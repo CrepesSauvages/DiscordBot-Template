@@ -1,10 +1,29 @@
 {
     "token": "YOUR_BOT_TOKEN_HERE",
+    "app_ip": "CLIENT ID",
+    "dev_guild_id": "SERVER ID",
     "prefix": "!",
     "ownerID": "YOUR_DISCORD_ID",
+    "mongoUri": "mongodb+srv://votreUtilisateur:votreMotDePasse@votreCluster.mongodb.net/nomDeVotreDB",
     "activity": {
-        "name": "with code",
-        "type": "PLAYING"
-    },
-    "embedColor": "#7289DA"
+        "dynamic": true,
+        "choices": [
+            {
+                "name": "🟢 En ligne",
+                "type": "PLAYING",
+                "order":1
+            },
+            {
+                "name": "🟠 En développement",
+                "type": "WATCHING",
+                "order":2
+            },
+            {
+                "name": "🔴 En maintenance",
+                "type": "LISTENING",
+                "order":3
+            }
+        ],
+        "interval": 15000
+    }
 }
