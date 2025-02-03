@@ -8,3 +8,5 @@ logs/
 .env
 .npm
 .codegpt
+
+src/config/main.json

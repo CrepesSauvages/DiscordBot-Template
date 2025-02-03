@@ -1,0 +1,10 @@
+{
+    "token": "YOUR_BOT_TOKEN_HERE",
+    "prefix": "!",
+    "ownerID": "YOUR_DISCORD_ID",
+    "activity": {
+        "name": "with code",
+        "type": "PLAYING"
+    },
+    "embedColor": "#7289DA"
+}
