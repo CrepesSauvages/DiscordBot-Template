@@ -10,3 +10,4 @@ logs/
 .codegpt
 
 src/config/main.json
+src/config/commandsCache.json
