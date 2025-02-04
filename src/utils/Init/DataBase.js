@@ -13,6 +13,7 @@ async function connectDatabase(mongoUri) {
 
     try {
         await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
         });
 
         log.success("✅ Connexion à MongoDB établie avec succès !");

@@ -32,7 +32,10 @@ module.exports = async (client) => {
         }
     }
 
-    const rest = new REST({ version: '10' }).setToken(client.config.TOKEN);
+    //console.log('Loaded commands:', commands);
+    //console.log('Loaded dev commands:', devCommands);
+
+    const rest = new REST({ version: '10' }).setToken(client.config.token);
 
     // Charger le cache existant
     let cache = { global: [], dev: [] };
@@ -47,7 +50,7 @@ module.exports = async (client) => {
     try {
         // Vérifier si les commandes globales ont changé
         if (JSON.stringify(commands) !== JSON.stringify(cache.global)) {
-            await rest.put(Routes.applicationCommands(client.config.APP_ID), { body: commands });
+            await rest.put(Routes.applicationCommands(client.config.app_ip), { body: commands });
             client.logs.info(`✅ ${commands.length} commandes globales mises à jour.`);
             cache.global = commands;
         } else {
@@ -57,7 +60,7 @@ module.exports = async (client) => {
         // Vérifier si les commandes dev ont changé
         if (client.config.DEV_GUILD_ID && JSON.stringify(devCommands) !== JSON.stringify(cache.dev)) {
             await rest.put(
-                Routes.applicationGuildCommands(client.config.APP_ID, client.config.DEV_GUILD_ID),
+                Routes.applicationGuildCommands(client.config.app_ip, client.config.dev_guild_id),
                 { body: devCommands }
             );
             client.logs.info(`🔧 ${devCommands.length} commandes de développement mises à jour.`);

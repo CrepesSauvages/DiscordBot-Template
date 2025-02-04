@@ -1,4 +1,26 @@
 {
-    "global": [],
+    "global": [
+        {
+            "options": [
+                {
+                    "type": 3,
+                    "name": "input",
+                    "description": "The input to echo back",
+                    "required": true
+                }
+            ],
+            "name": "restricted",
+            "description": "A restricted command",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [],
+            "name": "ping",
+            "description": "Pong!",
+            "dm_permission": false,
+            "type": 1
+        }
+    ],
     "dev": []
 }

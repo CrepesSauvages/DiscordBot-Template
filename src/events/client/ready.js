@@ -24,6 +24,7 @@ module.exports = {
                 });
                 activities.push(currentActivity);
             }, client.config.activity.interval);
+
         } else {
             const defaultActivity = client.config.activity.choices.sort((a, b) => a.order - b.order)[0];
             client.user.setPresence({
