@@ -1,7 +1,7 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-	dev: false, // hide from all guilds except from config.json
+	dev: true, // hide from all guilds except from config.json
 	guilds: ['1197542985601138708'], // guild whitelist via ID
 	roles: ['1199739724156391504'], // required to have one of the listed role IDs
 	users: ['562667788645171201'], // user whitelist via ID

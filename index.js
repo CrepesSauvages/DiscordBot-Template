@@ -38,6 +38,7 @@ client.commands = new Map();
 
 // Module 
 
+require('./src/utils/Overrides/InteractionOverrides.js')();
 require("./src/utils/Init/ProcessHandling.js")();
 require("./src/utils/Init/CheckIntents.js")(client);
 require('./src/utils/Handlers/ComponentLoader.js')(client);

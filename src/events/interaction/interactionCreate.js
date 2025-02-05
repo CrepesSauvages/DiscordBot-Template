@@ -86,8 +86,8 @@ async function checkPermissions(client, interaction, component) {
 
 	const botMember = interaction.guild?.members.cache.get(client.user.id) ?? await interaction.guild?.members.fetch(client.user.id).catch(() => null);
 	if (botMember !== null) {
-		CheckPermissions(component.clientPerms, botMember); // bot
-		CheckPermissions(component.userPerms, interaction.member); // user
+		CheckPermissions(component.clientPerms, botMember, client); // bot
+		CheckPermissions(component.userPerms, interaction.member, client); // user
 	}
 }
 
