@@ -13,6 +13,6 @@ module.exports = {
 		// this is optional, called on any autocomplete stuff
 	},
 	execute: async function(interaction, client) {
-		await interaction.reply({ content: 'Pong again!', hidden:true});;
+		await interaction.reply({ content: 'Pong again!', ephemeral: true});;
 	}
 }

@@ -34,13 +34,18 @@ client.config = require('./src/config/main.json')
 client.cooldowns = new Map();
 client.logs = require("./src/utils/logs.js");
 client.commands = new Map();
+client.activeCollectors = new Map();
 
 
-// Module 
+// [ Modules ] 
+require("./src/utils/Overrides/InteractionOverrides.js")();
 
-require('./src/utils/Overrides/InteractionOverrides.js')();
+//[ Init ]
+//require("./src/utils/Init/CheckPackages.js")();
 require("./src/utils/Init/ProcessHandling.js")();
 require("./src/utils/Init/CheckIntents.js")(client);
+
+// [ Handlers ]
 require('./src/utils/Handlers/ComponentLoader.js')(client);
 require("./src/utils/Handlers/EvenementLoaders.js")(client);
 require('./src/utils/Handlers/RegistreCommands.js')(client);
