@@ -9,7 +9,7 @@ const {
     User,
 } = Partials;
 
-const { connectDatabase } = require('./src/utils/Init/DataBase.js');    
+const { AdvancedDatabase } = require('./src/utils/Init/DataBase.js'); 
 
 const client = new Client({
     intents: 53608447, // Full intents
@@ -45,6 +45,7 @@ require("./src/utils/Overrides/InteractionOverrides.js")();
 require("./src/utils/Init/ProcessHandling.js")();
 require("./src/utils/Init/CheckIntents.js")(client);
 
+
 // [ Handlers ]
 require('./src/utils/Handlers/ComponentLoader.js')(client);
 require("./src/utils/Handlers/EvenementLoaders.js")(client);
@@ -53,7 +54,7 @@ require('./src/utils/Handlers/RegistreCommands.js')(client);
 
 client.logs.info("Starting bot...");
 client.login(client.config.token).then(() => {
-    //connectDatabase(client.config.mongoUri);
+    const db = new AdvancedDatabase(client.config.mongoUri, client.logs);
     client.logs.success("Bot started successfully!");
 }).catch((err) => {
     client.logs.error(err);

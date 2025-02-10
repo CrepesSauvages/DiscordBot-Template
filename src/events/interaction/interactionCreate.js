@@ -65,7 +65,9 @@ async function InteractionHandler(client, interaction, type) {
 	try {
 		CheckGuildAccess(component.guilds, interaction.guildId);
 		CheckUserAccess(component.roles, component.users, interaction.member, interaction.user);
-		CheckCooldown(client, interaction.user.id, component.customID ?? interaction.commandName, component.cooldown);
+		if (!interaction.isAutocomplete()) {
+			CheckCooldown(client, interaction.user.id, component.customID ?? interaction.commandName, component.cooldown);
+		}
 
 		const botMember = interaction.guild?.members.cache.get(client.user.id) ?? await interaction.guild?.members.fetch(client.user.id).catch(() => null);
 		if (botMember !== null) {
