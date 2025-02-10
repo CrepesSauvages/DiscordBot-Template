@@ -13,6 +13,47 @@
             "options": [
                 {
                     "type": 3,
+                    "choices": [
+                        {
+                            "name": "Set (ajouter/modifier)",
+                            "value": "set"
+                        },
+                        {
+                            "name": "Get (récupérer)",
+                            "value": "get"
+                        },
+                        {
+                            "name": "Delete (supprimer)",
+                            "value": "delete"
+                        }
+                    ],
+                    "name": "action",
+                    "description": "Action à effectuer (set, get, delete)",
+                    "required": true
+                },
+                {
+                    "autocomplete": true,
+                    "type": 3,
+                    "name": "key",
+                    "description": "Clé à utiliser",
+                    "required": true
+                },
+                {
+                    "type": 3,
+                    "name": "value",
+                    "description": "Valeur à stocker (nécessaire pour 'set')",
+                    "required": false
+                }
+            ],
+            "name": "database",
+            "description": "Interagit avec la base de données",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "type": 3,
                     "name": "input",
                     "description": "The input to echo back",
                     "required": true
