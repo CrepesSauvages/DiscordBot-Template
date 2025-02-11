@@ -6,11 +6,11 @@ const { PermissionsBitField: { Flags: Permissions } } = require('discord.js');
 
 const modules = [
 	'commands',
-	//'buttons',
-	//'menus',
-	//'modals',
-	//'messages',
+	'components/buttons',
+	'components/menus',
+	'components/modals',
 ];
+
 
 module.exports = function (client, folder = null) {
 	for (const module of modules) {
