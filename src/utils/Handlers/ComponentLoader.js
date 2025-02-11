@@ -24,7 +24,6 @@ module.exports = function (client, folder = null) {
 		}
 
 		const files = ReadFolder(module);
-		console.log(`Found ${files.length} files in ${module}:`, files);
 		for (const { path: filePath, data } of files) {
 			try {
 				if (!data.execute) throw `No execute function found`;
