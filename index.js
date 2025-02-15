@@ -9,7 +9,7 @@ const {
     User,
 } = Partials;
  
-const DatabaseManagerSingleton = require('./src/utils/DataBase/DatabaseManagerSingleton.js');
+const { AdvancedDatabase } = require('./src/utils/DataBase/DataBase.js'); 
 
 const client = new Client({
     intents: 53608447, // Full intents
@@ -35,7 +35,7 @@ client.cooldowns = new Map();
 client.logs = require("./src/utils/logs.js");
 client.commands = new Map();
 client.activeCollectors = new Map();
-client.database = DatabaseManagerSingleton
+client.database = new AdvancedDatabase(client.config.database.mongodb.uri, client.logs);
 
 
 // [ Modules ] 
@@ -55,7 +55,6 @@ require('./src/utils/Handlers/RegistreCommands.js')(client);
 
 client.logs.info("Starting bot...");
 client.login(client.config.token).then(() => {
-    //const db = new AdvancedDatabase(client.config.mongoUri, client.logs);
     client.logs.success("Bot started successfully!");
 }).catch((err) => {
     client.logs.error(err);
