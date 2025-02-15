@@ -13,29 +13,22 @@ module.exports = {
         .setDescription("Interagit avec la base de données")
         .addStringOption(option =>
             option.setName("action")
-                .setDescription("Action à effectuer (set, get, delete, createTable)")
+                .setDescription("Action à effectuer (set, get, delete)")
                 .setRequired(true)
                 .addChoices(
                     { name: "Set (ajouter/modifier)", value: "set" },
                     { name: "Get (récupérer)", value: "get" },
-                    { name: "Delete (supprimer)", value: "delete" },
-                    { name: "Create Table (créer une table)", value: "createTable" }
+                    { name: "Delete (supprimer)", value: "delete" }
                 )
         )
         .addStringOption(option =>
             option.setName("key")
                 .setDescription("Clé à utiliser")
                 .setRequired(true)
-                .setAutocomplete(false)
         )
         .addStringOption(option =>
             option.setName("value")
                 .setDescription("Valeur à stocker (nécessaire pour 'set')")
-                .setRequired(false)
-        )
-        .addStringOption(option =>
-            option.setName("columns")
-                .setDescription("Colonnes pour créer une table (nécessaire pour 'createTable')")
                 .setRequired(false)
         ),
 
@@ -43,36 +36,27 @@ module.exports = {
         const action = interaction.options.getString("action");
         const key = interaction.options.getString("key");
         const value = interaction.options.getString("value");
-        const columns = interaction.options.getString("columns");
+
         try {
+            const db = interaction.client.database;
+
             if (action === "set") {
                 if (!value) return interaction.reply({ content: "❌ Vous devez fournir une valeur pour 'set'!", ephemeral: true });
 
-                await interaction.client.database.set(key, value);
+                await db.create("bot_data", { key, value });
                 await interaction.reply(`✅ Clé **${key}** enregistrée avec la valeur **${value}**.`);
             }
             else if (action === "get") {
-                const result = await interaction.client.database.get(key);
-                if (!result) return interaction.reply({ content: `❌ Clé **${key}** introuvable!`, ephemeral: true });
+                const result = await db.find("bot_data", { key });
+                if (!result.length) return interaction.reply({ content: `❌ Clé **${key}** introuvable!`, ephemeral: true });
 
-                await interaction.reply(`📦 **${key}** → ${result}`);
+                await interaction.reply(`📦 **${key}** → ${result[0].value}`);
             }
             else if (action === "delete") {
-                const deleted = await interaction.client.database.delete(key);
-                if (!deleted) return interaction.reply({ content: `❌ Clé **${key}** introuvable!`, ephemeral: true });
+                const deleted = await db.delete("bot_data", { key });
+                if (!deleted.deletedCount) return interaction.reply({ content: `❌ Clé **${key}** introuvable!`, ephemeral: true });
 
                 await interaction.reply(`🗑️ Clé **${key}** supprimée avec succès.`);
-            }
-            else if (action === "createTable") {
-                if (!columns) return interaction.reply({ content: "❌ Vous devez fournir des colonnes pour 'createTable'!", ephemeral: true });
-
-                const columnsArray = columns.split(",").map(col => {
-                    const [name, type] = col.trim().split(" ");
-                    return { name, type };
-                });
-
-                await interaction.client.database.createTable(key, columnsArray);
-                await interaction.reply(`✅ Table **${key}** créée avec les colonnes **${columns}**.`);
             }
         } catch (error) {
             console.error(error);

@@ -25,18 +25,13 @@
                         {
                             "name": "Delete (supprimer)",
                             "value": "delete"
-                        },
-                        {
-                            "name": "Create Table (créer une table)",
-                            "value": "createTable"
                         }
                     ],
                     "name": "action",
-                    "description": "Action à effectuer (set, get, delete, createTable)",
+                    "description": "Action à effectuer (set, get, delete)",
                     "required": true
                 },
                 {
-                    "autocomplete": false,
                     "type": 3,
                     "name": "key",
                     "description": "Clé à utiliser",
@@ -46,12 +41,6 @@
                     "type": 3,
                     "name": "value",
                     "description": "Valeur à stocker (nécessaire pour 'set')",
-                    "required": false
-                },
-                {
-                    "type": 3,
-                    "name": "columns",
-                    "description": "Colonnes pour créer une table (nécessaire pour 'createTable')",
                     "required": false
                 }
             ],
