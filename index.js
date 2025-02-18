@@ -55,6 +55,10 @@ require("./src/utils/Init/CheckIntents.js")(client);
 
 // [ Handlers ]
 require('./src/utils/Handlers/ComponentLoader.js')(client);
+
+
+// [ Handlers ]
+require('./src/utils/Handlers/ComponentLoader.js')(client);
 require("./src/utils/Handlers/EvenementLoaders.js")(client);
 require('./src/utils/Handlers/RegistreCommands.js')(client);
 
