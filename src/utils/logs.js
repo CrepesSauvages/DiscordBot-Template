@@ -1,4 +1,6 @@
 const { inspect } = require('node:util');
+const fs = require('fs');
+const path = require('path');
 
 const color = {
     red: '\x1b[31m',
@@ -32,49 +34,25 @@ function getTimestamp() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+const logsDir = path.join(__dirname, '../../logs');
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// Fonction pour parser les messages (convertit les objets en chaînes)
 function parse(message) {
-    const properties = inspect(message, { depth: 3 });
-
-    const regex = /^\s*["'`](.*)["'`]\s*\+?$/gm;
-
-    const response = [];
-    for (const line of properties.split('\n')) {
-        response.push(line.replace(regex, '$1'));
+    if (typeof message === 'object') {
+        return JSON.stringify(message, null, 2);
     }
-
-    return response.join('\n');
+    return message;
 }
 
-function info(message) {
-    console.log(`${color.yellow}[${getTimestamp()}]${color.reset} ${parse(message)}`);
-}
-
-function warn(message) {
-    console.log(`${color.orange}[${getTimestamp()}]${color.reset} ${parse(message)}`);
-}
-
-function error(message) {
-    console.log(`${color.red}[${getTimestamp()}] ${parse(message)}${color.reset}`);
-}
-
-function success(message) {
-    console.log(`${color.green}[${getTimestamp()}]${color.reset} ${parse(message)}`);
-}
-
-function debug(message) {
-    console.log(`${color.blue}[${getTimestamp()}]${color.reset} ${parse(message)}`);
-}
-
-function deleted(message) {
-    console.log(`${color.pink}[${getTimestamp()}]${color.reset} ${parse(message)}`);
-}
-
-function updated(message) {
-    console.log(`${color.purple}[${getTimestamp()}]${color.reset} ${parse(message)}`);
-}
-
-function created(message) {
-    console.log(`${color.cyan}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+// Fonction pour écrire dans un fichier de log
+function logToFile(message, level = 'info') {
+    const timestamp = getTimestamp();
+    const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${parse(message)}\n`;
+    const logFile = path.join(logsDir, `${level}.log`);
+    fs.appendFileSync(logFile, logMessage);
 }
 
 function custom(message, hexColor) {
@@ -95,4 +73,58 @@ function custom(message, hexColor) {
     console.log(`${ansiRGB}[${getTimestamp()}]${color.reset} ${parse(message)}`);
 }
 
-module.exports = { getTimestamp, info, warn, error, success, debug, deleted, updated, created, custom };
+// Fonction pour nettoyer les anciens logs (plus de 7 jours)
+function cleanOldLogs() {
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
+    fs.readdir(logsDir, (err, files) => {
+        if (err) return;
+        const now = Date.now();
+        files.forEach(file => {
+            const filePath = path.join(logsDir, file);
+            fs.stat(filePath, (err, stats) => {
+                if (err) return;
+                if (now - stats.mtime.getTime() > maxAge) {
+                    fs.unlink(filePath, () => {});
+                }
+            });
+        });
+    });
+}
+
+// Nettoyage automatique des logs tous les jours
+setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
+
+module.exports = {
+    info: (message) => {
+        console.log(`${color.blue}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'info');
+    },
+    success: (message) => {
+        console.log(`${color.green}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'success');
+    },
+    warn: (message) => {
+        console.log(`${color.yellow}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'warning');
+    },
+    error: (message) => {
+        console.log(`${color.red}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'error');
+    },
+    debug: (message) => {
+        console.log(`${color.magenta}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'debug');
+    },
+    critical: (message) => {
+        console.log(`${color.lightRed}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'critical');
+    },
+    verbose: (message) => {
+        console.log(`${color.lightCyan}[${getTimestamp()}]${color.reset} ${parse(message)}`);
+        logToFile(message, 'verbose');
+    }, 
+    custom: (message, hexColor) => {
+        custom(message, hexColor);
+        logToFile(message, 'custom');
+    }
+};

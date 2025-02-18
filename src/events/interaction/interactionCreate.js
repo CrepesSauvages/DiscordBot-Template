@@ -19,6 +19,21 @@ module.exports = {
 		switch (interaction.type) {
 			case 4: // Autocomplete
 			case 2: // Slash Commands
+				let commandName = interaction.commandName;
+				
+				// Vérification des commandes temporaires
+				command = client.commands.get(commandName);
+				if (client.tempCommands.tempCommands.has(commandName)) {
+					const tempCommand = client.tempCommands.tempCommands.get(commandName);
+					if (Date.now() > tempCommand.expiresAt) {
+						client.tempCommands.delete(commandName);
+						throw ['Cette commande temporaire a expiré', 'Expired command'];
+					}
+					command = tempCommand.data;
+				}
+
+				if (!command) throw ['Commande non trouvée', 'Command not found'];
+
 				const subcommand = interaction.options._subcommand ?? "";
 				const subcommandGroup = interaction.options._subcommandGroup ?? "";
 				const commandArgs = interaction.options._hoistedOptions ?? [];

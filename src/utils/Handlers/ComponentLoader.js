@@ -13,6 +13,9 @@ const modules = [
 
 
 module.exports = function (client, folder = null) {
+	if (!client.tempCommands) client.tempCommands = new Map();
+	if (!client.aliases) client.aliases = new Map();
+
 	for (const module of modules) {
 		if (typeof folder === 'string' && folder !== module) continue;
 
@@ -72,6 +75,27 @@ module.exports = function (client, folder = null) {
 					}
 				}
 
+				// Gestion des alias
+				if (data.aliases && Array.isArray(data.aliases)) {
+					data.aliases.forEach(alias => {
+						client.aliases.set(alias, data.data.name);
+					});
+				}
+
+				// Gestion des commandes temporaires
+				if (data.temporary) {
+					const duration = data.temporary.duration || 3600000; // 1 heure par défaut
+					client.tempCommands.set(data.data.name, {
+						expires: Date.now() + duration,
+						data: data
+					});
+
+					setTimeout(() => {
+						client.tempCommands.delete(data.data.name);
+						client.logs.info(`Commande temporaire ${data.data.name} expirée`);
+					}, duration);
+				}
+
 				switch (module) {
 					case 'messages':
 						if (!data.name) throw 'No name property found';
@@ -97,11 +121,10 @@ module.exports = function (client, folder = null) {
 						break;
 				}
 			} catch (error) {
-				client.logs.error(`[${module.toUpperCase()}] Failed to load ./${filePath}: ${error.stack || error}`);
+				client.logs.error(`Erreur lors du chargement de ${filePath}: ${error}`);
 			}
-
 		}
-		client.logs.debug(`Loaded ${client[module].size} ${module}`)
+		client.logs.info(`Loaded ${client[module].size} ${module}`)
 	}
 };
 
