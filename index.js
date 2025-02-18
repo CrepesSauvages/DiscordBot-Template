@@ -43,7 +43,7 @@ client.tempCommands = new TempCommandManager(client);
 client.aliases = new AliasManager(client);
 client.customEvents = new CustomEventManager(client);
 
-client.logs.info("Test")
+
 // [ Modules ] 
 require("./src/utils/Overrides/InteractionOverrides.js")();
 
