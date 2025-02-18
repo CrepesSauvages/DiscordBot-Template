@@ -5,15 +5,8 @@
     "prefix": "!",
     "ownerID": "YOUR_DISCORD_ID",
     "database": {
-        "type": "mysql",
         "mongodb": {
-            "uri": "mongodb+srv://votreUtilisateur:votreMotDePasse@votreCluster.mongodb.net/nomDeVotreDB"
-        },
-        "mysql": {
-            "host": "Address_IP",
-            "user": "User",
-            "password": "Password",
-            "database": "Template"
+            "uri": "mongodb://localhost:27017/bottemplate"
         }
     },
     "activity": {
