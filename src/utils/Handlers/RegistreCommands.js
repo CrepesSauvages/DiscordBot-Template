@@ -1,3 +1,4 @@
+// filepath: /c:/Users/babou/OneDrive/Bureau/DiscordBot-Template/src/utils/Handlers/RegistreCommands.js
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const fs = require('fs');
@@ -24,17 +25,18 @@ module.exports = async (client) => {
 
             if (command.dev) {
                 devCommands.push(commandData);
+                client.logs.info(`🔧 Commande de développement trouvée: ${commandData.name}`);
             } else {
                 commands.push(commandData);
+                client.logs.info(`✅ Commande globale trouvée: ${commandData.name}`);
             }
         } catch (error) {
             client.logs.error(`❌ [REGISTER] Échec de l'enregistrement de ${command?.data?.name || "Inconnu"} : ${error.message}`);
         }
     }
 
-    const rest = new REST({ version: '10' }).setToken(client.config.TOKEN);
+    const rest = new REST({ version: '10' }).setToken(client.config.token);
 
-    // Charger le cache existant
     let cache = { global: [], dev: [] };
     if (fs.existsSync(CACHE_FILE)) {
         try {
@@ -45,19 +47,17 @@ module.exports = async (client) => {
     }
 
     try {
-        // Vérifier si les commandes globales ont changé
         if (JSON.stringify(commands) !== JSON.stringify(cache.global)) {
-            await rest.put(Routes.applicationCommands(client.config.APP_ID), { body: commands });
+            await rest.put(Routes.applicationCommands(client.config.app_ip), { body: commands });
             client.logs.info(`✅ ${commands.length} commandes globales mises à jour.`);
             cache.global = commands;
         } else {
             client.logs.info("🔄 Aucune modification des commandes globales.");
         }
 
-        // Vérifier si les commandes dev ont changé
-        if (client.config.DEV_GUILD_ID && JSON.stringify(devCommands) !== JSON.stringify(cache.dev)) {
+        if (client.config.dev_guild_id && JSON.stringify(devCommands) !== JSON.stringify(cache.dev)) {
             await rest.put(
-                Routes.applicationGuildCommands(client.config.APP_ID, client.config.DEV_GUILD_ID),
+                Routes.applicationGuildCommands(client.config.app_ip, client.config.dev_guild_id),
                 { body: devCommands }
             );
             client.logs.info(`🔧 ${devCommands.length} commandes de développement mises à jour.`);
@@ -66,7 +66,6 @@ module.exports = async (client) => {
             client.logs.info("🔄 Aucune modification des commandes de développement.");
         }
 
-        // Sauvegarder le cache
         fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 4), 'utf-8');
     } catch (error) {
         client.logs.error(`❌ Erreur lors de l'enregistrement des commandes : ${error.message}`);

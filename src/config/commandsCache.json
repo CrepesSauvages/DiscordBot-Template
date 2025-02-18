@@ -1,4 +1,111 @@
 {
-    "global": [],
-    "dev": []
+    "global": [
+        {
+            "options": [],
+            "name": "ping",
+            "description": "Pong!",
+            "dm_permission": false,
+            "type": 1
+        }
+    ],
+    "dev": [
+        {
+            "options": [
+                {
+                    "type": 3,
+                    "name": "input",
+                    "description": "The input to echo back",
+                    "required": true
+                }
+            ],
+            "name": "restricted",
+            "description": "A restricted command",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "type": 1,
+                    "name": "create",
+                    "description": "Créer une nouvelle commande temporaire",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "name",
+                            "description": "Nom de la commande",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "description",
+                            "description": "Description de la commande",
+                            "required": true
+                        },
+                        {
+                            "type": 4,
+                            "name": "duration",
+                            "description": "Durée en minutes",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "response",
+                            "description": "Réponse de la commande",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "list",
+                    "description": "Liste toutes les commandes temporaires",
+                    "options": []
+                },
+                {
+                    "type": 1,
+                    "name": "delete",
+                    "description": "Supprime une commande temporaire",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "name",
+                            "description": "Nom de la commande",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "extend",
+                    "description": "Prolonge la durée d'une commande temporaire",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "name",
+                            "description": "Nom de la commande",
+                            "required": true
+                        },
+                        {
+                            "type": 4,
+                            "name": "minutes",
+                            "description": "Minutes à ajouter",
+                            "required": true
+                        }
+                    ]
+                }
+            ],
+            "name": "temp",
+            "description": "Gestion des commandes temporaires",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [],
+            "name": "testbot",
+            "description": "Teste toutes les fonctionnalités du bot",
+            "dm_permission": false,
+            "type": 1
+        }
+    ]
 }
