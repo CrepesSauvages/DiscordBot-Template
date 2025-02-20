@@ -13,6 +13,7 @@ const { AdvancedDatabase } = require('./src/utils/DataBase/DataBase.js');
 const TempCommandManager = require('./src/utils/TempCommands');
 const AliasManager = require('./src/utils/AliasManager');
 const CustomEventManager = require('./src/utils/CustomEvents');
+const LocaleManager = require('./src/utils/LocaleManager');
 
 const client = new Client({
     intents: 53608447, // Full intents
@@ -42,6 +43,7 @@ client.database = new AdvancedDatabase(client.config.database. mongodb.uri, clie
 client.tempCommands = new TempCommandManager(client);
 client.aliases = new AliasManager(client);
 client.customEvents = new CustomEventManager(client);
+client.locales = new LocaleManager(client);
 
 
 // [ Modules ] 

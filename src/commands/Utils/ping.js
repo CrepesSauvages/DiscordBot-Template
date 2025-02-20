@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -13,6 +13,11 @@ module.exports = {
 		// this is optional, called on any autocomplete stuff
 	},
 	execute: async function(interaction, client) {
-		await interaction.reply({ content: 'Pong again!', ephemeral: true});;
+		const locale = await client.locales.getGuildLocale(interaction.guildId);
+		const response = client.locales.translate('commands.ping.responses.pong', locale, {
+			ms: client.ws.ping
+		});
+		
+		await interaction.reply({ content: response, ephemeral: true });
 	}
 }

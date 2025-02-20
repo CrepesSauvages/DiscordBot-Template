@@ -1,0 +1,49 @@
+{
+    "commands": {
+        "ping": {
+            "name": "ping",
+            "description": "Vérifier la latence du bot",
+            "responses": {
+                "pong": "Pong! Latence: {{ms}}ms"
+            }
+        },
+        "temp": {
+            "name": "temp",
+            "description": "Gestion des commandes temporaires",
+            "create": {
+                "name": "create",
+                "description": "Créer une nouvelle commande temporaire",
+                "options": {
+                    "name": "Nom de la commande",
+                    "description": "Description de la commande",
+                    "duration": "Durée en minutes",
+                    "response": "Réponse de la commande"
+                }
+            }
+        },
+        "help": {
+            "name": "help",
+            "description": "Affiche la liste des commandes",
+            "title": "📚 Liste des Commandes",
+            "category_description": "Liste des commandes dans la catégorie {category}",
+            "invalid_category": "Cette catégorie n'existe pas",
+            "no_commands": "Aucune commande disponible"
+        },
+        "language": {
+            "name": "langue",
+            "description": "Définir la langue du serveur",
+            "success": "La langue du serveur a été changée en {language}",
+            "options": {
+                "locale": {
+                    "name": "langue",
+                    "description": "Choisir la langue"
+                }
+            }
+        }
+    },
+    "errors": {
+        "missing_permissions": "Vous n'avez pas les permissions nécessaires",
+        "command_not_found": "Commande introuvable",
+        "cooldown": "Veuillez attendre {{time}} secondes avant de réutiliser cette commande"
+    }
+} 
