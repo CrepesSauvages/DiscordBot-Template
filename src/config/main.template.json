@@ -4,6 +4,7 @@
     "dev_guild_id": "SERVER ID",
     "prefix": "!",
     "ownerID": "YOUR_DISCORD_ID",
+    "devs": ["ID1", "ID2"],
     "database": {
         "mongodb": {
             "uri": "mongodb://localhost:27017/bottemplate"

@@ -1,12 +1,13 @@
 # Discord Bot Template
 
-Un bot Discord modulaire et extensible avec gestion des commandes temporaires, des alias et des événements personnalisés.
+Un bot Discord modulaire et extensible avec gestion des commandes temporaires, des alias, des événements personnalisés et support multilingue.
 
 ## 🌟 Fonctionnalités
 
 - ⚡ Système de commandes slash avec gestion des sous-commandes
 - ⏱️ Commandes temporaires avec durée configurable
 - 🔄 Alias de commandes
+- 🌍 Support multilingue (FR, EN, ES)
 - 🛡️ Système de permissions avancé
 - 🎯 Gestion des cooldowns
 - 📊 Base de données MongoDB intégrée
@@ -32,11 +33,32 @@ git clone https://github.com/CrepesSauvages/DiscordBot-Template
 npm install
 ```
 3. Configurez le fichier `src/config/main.json`
+```json
+{
+    "token": "YOUR_BOT_TOKEN_HERE",
+    "app_ip": "CLIENT ID",
+    "dev_guild_id": "SERVER ID",
+    "prefix": "!",
+    "ownerID": "YOUR_DISCORD_ID",
+    "devs": ["ID1", "ID2"],
+    "database": {
+        "mongodb": {
+            "uri": "MongoDB URI"
+        }
+    },
+}
+```
 
 4. Démarrez le bot
 ```bash
 node .
 ```
+
+## 🔧 Commandes principales
+
+- `/help` : Afficher la liste des commandes
+- `/language` : Changer la langue du serveur
+- `/ping` : Vérifier la latence du bot
 
 ## 🔧 Commandes de développement
 
@@ -50,90 +72,61 @@ node .
     ├── package.json
     └── src/
         ├── commands/ # Commandes du bot
+        │   ├── Admin/
+        │   │   └── language.js
         │   ├── Dev/
         │   │   ├── restricted.js
         │   │   ├── temp_manager.js
         │   │   └── test_bot.js
         │   └── Utils/
+        │       ├── help.js
         │       └── ping.js
-        ├── components/ # Commandes du bot
+        ├── components/ # Composants interactifs
         │   ├── buttons/
-        │   │   ├── save.js
-        │   │   ├── test_button.js
-        │   │   └── navigation/
-        │   │       ├── close.js
-        │   │       └── goto.js
         │   ├── menus/
-        │   │   └── test_menue.js
         │   └── modals/
-        │       └── test_modal.js
         ├── config/ # Fichiers de configuration
-        │   ├── commandsCache.json
-        │   └── main.template.json
         ├── events/ # Gestionnaires d'événements
-        │   ├── client/
-        │   │   └── ready.js
-        │   └── interaction/
-        │       └── interactionCreate.js
+        ├── locales/ # Fichiers de traduction
+        │   ├── en.json
+        │   ├── fr.json
+        │   └── es.json
         └── utils/ # Utilitaires et helpers
-            ├── AliasManager.js
-            ├── CustomEvents.js
-            ├── ReadingFolder.js
-            ├── TempCommands.js
-            ├── logs.js
-            ├── Checker/
-            │   ├── Cooldown.js
-            │   ├── GuildAccess.js
-            │   ├── Permissions.js
-            │   └── UserAccess.js
-            ├── DataBase/
-            │   └── DataBase.js
-            ├── Handlers/
-            │   ├── ComponentLoader.js
-            │   ├── EvenementLoaders.js
-            │   └── RegistreCommands.js
-            ├── Init/
-            │   ├── CheckIntents.js
-            │   ├── CheckPackages.js
-            │   └── ProcessHandling.js
-            ├── Overrides/
-            │   ├── Collector.js
-            │   └── InteractionOverrides.js
-            └── Schemas/
-                └── DataBase/
-                    └── DataBase.js
-
-
+            ├── LocaleManager.js
+            └── ... autres utilitaires ...
 
 ## 🛠️ Développement
 
 ### Créer une nouvelle commande
 ```javascript
 const { SlashCommandBuilder } = require('discord.js');
+
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName('command_name')
-    .setDescription('Command description'),
-  async execute(interaction, client) {
-    // Votre code ici
-  }
+    data: new SlashCommandBuilder()
+        .setName('command_name')
+        .setDescription('Command description'),
+    async execute(interaction, client) {
+        const locale = await client.locales.getGuildLocale(interaction.guildId);
+        // Votre code ici
+    }
 };
-
 ```
 
-
-### Créer une commande temporaire
-
-```javascript
-client.tempCommands.create('command_name', {
-  data: commandData,
-  execute: async (interaction) => {
-  // Votre code ici
-  }
-}, duration);
-
+### Ajouter des traductions
+```json
+{
+    "commands": {
+        "command_name": {
+            "name": "nom_commande",
+            "description": "Description de la commande",
+            "responses": {
+                "success": "Message de succès",
+                "error": "Message d'erreur"
+            }
+        }
+    }
+}
 ```
-
 
 ## 📜 License
 
