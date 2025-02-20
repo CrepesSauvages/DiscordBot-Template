@@ -38,7 +38,7 @@
         "language": {
             "name": "language",
             "description": "Set server language",
-            "success": "Server language has been changed to {language}",
+            "success": "Server language has been changed to {{language}}",
             "options": {
                 "locale": {
                     "name": "language",
@@ -50,7 +50,7 @@
             "name": "help",
             "description": "Display commands list",
             "title": "📚 Commands List",
-            "category_description": "List of commands in {category} category",
+            "category_description": "List of commands in {{category}} category",
             "invalid_category": "This category doesn't exist",
             "no_commands": "No commands available"
         }
