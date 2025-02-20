@@ -1,0 +1,86 @@
+{
+    "commands": {
+        "ping": {
+            "name": "ping",
+            "description": "Check bot latency",
+            "responses": {
+                "pong": "Pong! Latency: {{ms}}ms"
+            }
+        },
+        "temp": {
+            "name": "temp",
+            "description": "Temporary commands management",
+            "create": {
+                "name": "create",
+                "description": "Create a new temporary command",
+                "options": {
+                    "name": "Command name",
+                    "description": "Command description",
+                    "duration": "Duration in minutes",
+                    "response": "Command response"
+                }
+            },
+            "list": {
+                "name": "list",
+                "description": "List all active temporary commands",
+                "responses": {
+                    "no_commands": "No temporary commands active",
+                    "commands_list": "Active temporary commands:\n{{commands}}"
+                }
+            },
+            "delete": {
+                "name": "delete",
+                "description": "Delete a temporary command",
+                "success": "Command successfully deleted",
+                "not_found": "Command not found"
+            }
+        },
+        "language": {
+            "name": "language",
+            "description": "Set server language",
+            "success": "Server language has been changed to {language}",
+            "options": {
+                "locale": {
+                    "name": "language",
+                    "description": "Choose language"
+                }
+            }
+        },
+        "help": {
+            "name": "help",
+            "description": "Display commands list",
+            "title": "📚 Commands List",
+            "category_description": "List of commands in {category} category",
+            "invalid_category": "This category doesn't exist",
+            "no_commands": "No commands available"
+        }
+    },
+    "errors": {
+        "missing_permissions": "You don't have the required permissions",
+        "command_not_found": "Command not found",
+        "cooldown": "Please wait {{time}} seconds before using this command again",
+        "invalid_language": "Invalid language selected",
+        "bot_missing_permissions": "I don't have the required permissions",
+        "unexpected_error": "An unexpected error occurred",
+        "invalid_duration": "Invalid duration specified",
+        "invalid_input": "Invalid input provided"
+    },
+    "common": {
+        "yes": "Yes",
+        "no": "No",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "success": "Success",
+        "error": "Error",
+        "loading": "Loading...",
+        "saving": "Saving...",
+        "done": "Done!",
+        "cancelled": "Cancelled",
+        "time": {
+            "seconds": "seconds",
+            "minutes": "minutes",
+            "hours": "hours",
+            "days": "days"
+        }
+    }
+} 
