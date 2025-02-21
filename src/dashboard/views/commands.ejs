@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= translate('commands.settings.name') %> - <%= guild.name %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="/img/bot-logo.png" alt="Bot Logo">
+            </div>
+            <nav>
+                <a href="/">
+                    <i class="material-icons">dashboard</i>
+                    Dashboard
+                </a>
+                <a href="/guild/<%= guild.id %>/settings">
+                    <i class="material-icons">settings</i>
+                    <%= translate('dashboard.settings.title') %>
+                </a>
+                <a href="/guild/<%= guild.id %>/commands" class="active">
+                    <i class="material-icons">code</i>
+                    <%= translate('commands.settings.name') %>
+                </a>
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="server-info">
+                    <img src="<%= guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : '/img/default_guild.png' %>" 
+                         alt="<%= guild.name %>">
+                    <h2><%= guild.name %></h2>
+                </div>
+                <div class="search-bar">
+                    <i class="material-icons">search</i>
+                    <input type="text" id="commandSearch" 
+                           placeholder="<%= translate('dashboard.commands.search') %>">
+                </div>
+            </div>
+
+            <div class="commands-grid">
+                <% commands.forEach(command => { %>
+                    <div class="command-card" data-name="<%= command.name %>">
+                        <div class="command-header">
+                            <h3>/<%= command.name %></h3>
+                            <label class="switch">
+                                <input type="checkbox" 
+                                       data-command="<%= command.name %>"
+                                       <%= command.enabled ? 'checked' : '' %>>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <p class="command-description"><%= translate(`commands.${command.name}.description`) %></p>
+                        <div class="command-footer">
+                            <button class="btn-settings" data-command="<%= command.name %>">
+                                <i class="material-icons">settings</i>
+                                <%= translate('dashboard.commands.configure') %>
+                            </button>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="commandModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><%= translate('dashboard.commands.modal.title') %></h2>
+                <button class="close-modal">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <form id="commandSettings">
+                <div class="form-group">
+                    <label>
+                        <i class="material-icons">security</i>
+                        <%= translate('dashboard.commands.modal.permissions') %>
+                    </label>
+                    <select multiple name="permissions" class="select-permissions">
+                        <option value="ADMINISTRATOR">
+                            <%= translate('permissions.administrator') %>
+                        </option>
+                        <option value="MANAGE_GUILD">
+                            <%= translate('permissions.manageGuild') %>
+                        </option>
+                        <option value="MANAGE_MESSAGES">
+                            <%= translate('permissions.manageMessages') %>
+                        </option>
+                        <option value="KICK_MEMBERS">
+                            <%= translate('permissions.kickMembers') %>
+                        </option>
+                        <option value="BAN_MEMBERS">
+                            <%= translate('permissions.banMembers') %>
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <i class="material-icons">timer</i>
+                        <%= translate('dashboard.commands.modal.cooldown') %>
+                    </label>
+                    <input type="number" name="cooldown" min="0" class="input-cooldown">
+                </div>
+                <button type="submit" class="btn-save">
+                    <i class="material-icons">save</i>
+                    <%= translate('common.save') %>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const guildId = '<%= guild.id %>';
+        const translations = "<%- JSON.stringify(translations) %>";
+    </script>
+    <script src="/js/commands.js"></script>
+</body>
+</html> 

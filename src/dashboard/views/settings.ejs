@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= translate('dashboard.settings.title') %> - <%= guild.name %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="/img/bot-logo.png" alt="Bot Logo">
+            </div>
+            <nav>
+                <a href="/">
+                    <i class="material-icons">dashboard</i>
+                    Dashboard
+                </a>
+                <a href="/guild/<%= guild.id %>/settings" class="active">
+                    <i class="material-icons">settings</i>
+                    <%= translate('dashboard.settings.title') %>
+                </a>
+                <a href="/guild/<%= guild.id %>/commands">
+                    <i class="material-icons">code</i>
+                    <%= translate('commands.settings.name') %>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="server-info">
+                    <img src="<%= guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : '/img/default_guild.png' %>" alt="<%= guild.name %>">
+                    <h2><%= guild.name %></h2>
+                </div>
+                <button id="saveAllSettings" class="btn-save-all">
+                    <i class="material-icons">save</i>
+                    <%= translate('common.saving') %>
+                </button>
+            </div>
+
+            <div class="settings-container">
+                <!-- Section Générale -->
+                <div class="settings-section">
+                    <h3>
+                        <i class="material-icons">tune</i>
+                        <%= translate('dashboard.settings.general.title') %>
+                    </h3>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="material-icons">language</i>
+                                <h4><%= translate('dashboard.settings.general.language') %></h4>
+                            </div>
+                            <select name="language" class="setting-input">
+                                <option value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
+                                <option value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
+                                <option value="es" <%= settings.language === 'es' ? 'selected' : '' %>>Español</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="material-icons">notifications</i>
+                                <h4><%= translate('dashboard.settings.general.logChannel') %></h4>
+                            </div>
+                            <select name="logChannel" class="setting-input">
+                                <option value="">
+                                    <%= translate('common.disabled') %>
+                                </option>
+                                <% channels.forEach(channel => { %>
+                                    <option value="<%= channel.id %>" 
+                                            <%= settings.logChannel === channel.id ? 'selected' : '' %>>
+                                        #<%= channel.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+
+                        <!-- Message de Bienvenue -->
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="material-icons">waving_hand</i>
+                                <h4><%= translate('dashboard.settings.welcome.title') %></h4>
+                            </div>
+                            <div class="welcome-settings">
+                                <select name="welcomeChannel" class="setting-input">
+                                    <option value="">
+                                        <%= translate('common.disabled') %>
+                                    </option>
+                                    <% channels.forEach(channel => { %>
+                                        <option value="<%= channel.id %>"
+                                                <%= settings.welcomeChannel === channel.id ? 'selected' : '' %>>
+                                            #<%= channel.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                                <textarea name="welcomeMessage" class="setting-input" 
+                                          placeholder="<%= translate('dashboard.settings.welcome.message') %>"><%= settings.welcomeMessage %></textarea>
+                                <small class="setting-help">
+                                    <%= translate('dashboard.settings.welcome.variables') %>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Auto-Rôle -->
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="material-icons">person_add</i>
+                                <h4><%= translate('dashboard.settings.roles.autoRole') %></h4>
+                            </div>
+                            <select name="autoRole" class="setting-input">
+                                <option value="">
+                                    <%= translate('common.disabled') %>
+                                </option>
+                                <% roles.forEach(role => { %>
+                                    <option value="<%= role.id %>"
+                                            <%= settings.autoRole === role.id ? 'selected' : '' %>>
+                                        @<%= role.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Modération -->
+                <div class="settings-section">
+                    <h3>
+                        <i class="material-icons">security</i>
+                        <%= translate('dashboard.settings.moderation.title') %>
+                    </h3>
+                    <div class="settings-grid">
+                        <!-- Anti-Spam -->
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="material-icons">block</i>
+                                <h4><%= translate('dashboard.settings.moderation.antiSpam') %></h4>
+                            </div>
+                            <div class="anti-spam-settings">
+                                <label class="switch">
+                                    <input type="checkbox" name="antiSpam" 
+                                           <%= settings.antiSpam ? 'checked' : '' %>>
+                                    <span class="slider"></span>
+                                </label>
+                                <input type="number" name="antiSpamThreshold" 
+                                       class="setting-input" min="1" max="10"
+                                       value="<%= settings.antiSpamThreshold || 5 %>"
+                                       placeholder="<%= translate('dashboard.settings.moderation.antiSpamThreshold') %>">
+                            </div>
+                        </div>
+
+                        <!-- Anti-Liens -->
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="material-icons">link_off</i>
+                                <h4><%= translate('dashboard.settings.moderation.antiLink') %></h4>
+                            </div>
+                            <div class="anti-link-settings">
+                                <label class="switch">
+                                    <input type="checkbox" name="antiLink" 
+                                           <%= settings.antiLink ? 'checked' : '' %>>
+                                    <span class="slider"></span>
+                                </label>
+                                <select name="antiLinkWhitelist" class="setting-input" multiple>
+                                    <% channels.forEach(channel => { %>
+                                        <option value="<%= channel.id %>"
+                                                <%= settings.antiLinkWhitelist?.includes(channel.id) ? 'selected' : '' %>>
+                                            #<%= channel.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const guildId = '<%= guild.id %>';
+        const translations = "<%- JSON.stringify(translations) %>";
+    </script>
+    <script src="/js/settings.js"></script>
+</body>
+</html> 
