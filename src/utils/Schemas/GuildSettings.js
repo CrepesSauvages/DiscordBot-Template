@@ -17,4 +17,26 @@ const guildSettingsSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('GuildSettings', guildSettingsSchema); 
+// Ajout de la méthode statique getOrCreate
+guildSettingsSchema.statics.getOrCreate = async function(guildId) {
+    try {
+        let guildSettings = await this.findOne({ guildId });
+        
+        if (!guildSettings) {
+            guildSettings = await this.create({
+                guildId,
+                locale: 'fr',
+                settings: new Map()
+            });
+        }
+        
+        return guildSettings;
+    } catch (error) {
+        console.error(`Erreur lors de la récupération/création des paramètres pour le serveur ${guildId}:`, error);
+        throw error;
+    }
+};
+
+const GuildSettings = mongoose.model('GuildSettings', guildSettingsSchema);
+
+module.exports = GuildSettings; 

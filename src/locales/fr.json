@@ -45,5 +45,17 @@
         "missing_permissions": "Vous n'avez pas les permissions nécessaires",
         "command_not_found": "Commande introuvable",
         "cooldown": "Veuillez attendre {{time}} secondes avant de réutiliser cette commande"
+    },
+    "dashboard": {
+        "welcome": {
+            "title": "Bienvenue sur le Dashboard",
+            "subtitle": "Gérez votre bot Discord facilement",
+            "login": "Se connecter avec Discord"
+        },
+        "servers": {
+            "title": "Mes serveurs",
+            "manage": "Gérer",
+            "setup": "Installer le bot"
+        }
     }
 } 

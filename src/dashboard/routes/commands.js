@@ -1,38 +1,59 @@
 const router = require('express').Router();
-const { hasGuildPermission } = require('../middleware/auth');
+const { isAuthenticated, hasGuildPermission } = require('../middleware/auth');
 
-router.get('/guild/:guildId/commands', hasGuildPermission, async (req, res) => {
+router.get('/guild/:guildId/commands', isAuthenticated, hasGuildPermission, async (req, res) => {
     try {
-        const guild = await req.app.client.guilds.fetch(req.params.guildId);
-        const commands = Array.from(req.app.client.commands.values()).map(cmd => ({
+        const guild = await res.locals.client.guilds.fetch(req.params.guildId);
+        
+        const commands = Array.from(res.locals.client.commands.values()).map(cmd => ({
             name: cmd.data.name,
             description: cmd.data.description,
-            enabled: true, // À remplacer par la vraie valeur depuis la DB
+            category: cmd.category || 'Général',
             permissions: cmd.userPerms || [],
-            cooldown: cmd.cooldown || 0
+            enabled: true // Vous pouvez ajouter une logique pour vérifier si la commande est activée
         }));
+
+        const commandsByCategory = commands.reduce((acc, cmd) => {
+            if (!acc[cmd.category]) {
+                acc[cmd.category] = [];
+            }
+            acc[cmd.category].push(cmd);
+            return acc;
+        }, {});
 
         res.render('commands', { 
             guild,
-            commands,
-            user: req.user
+            commandsByCategory,
+            user: req.user,
+            active: 'commands'
         });
     } catch (error) {
-        res.status(500).render('error', { error: error.message });
+        console.error('Erreur route commandes:', error);
+        res.status(500).render('error', { 
+            error: 'Erreur lors du chargement des commandes',
+            user: req.user 
+        });
     }
 });
 
-router.patch('/api/guild/:guildId/commands/:commandName', hasGuildPermission, async (req, res) => {
+router.patch('/api/guild/:guildId/commands/:commandName', isAuthenticated, hasGuildPermission, async (req, res) => {
     try {
         const { guildId, commandName } = req.params;
         const { enabled } = req.body;
-        
-        // Mettre à jour dans la base de données
-        // await GuildSettings.updateCommand(guildId, commandName, { enabled });
-        
-        res.json({ success: true });
+
+        // Ici, ajoutez la logique pour activer/désactiver la commande
+        // Par exemple, sauvegarder l'état dans la base de données
+
+        res.json({
+            success: true,
+            message: `Commande ${commandName} ${enabled ? 'activée' : 'désactivée'}`
+        });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Erreur modification commande:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erreur lors de la modification de la commande'
+        });
     }
 });
 

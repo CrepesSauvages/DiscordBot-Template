@@ -1,11 +1,11 @@
 const router = require('express').Router();
-const { hasGuildPermission } = require('../middleware/auth');
+const { isAuthenticated, hasGuildPermission } = require('../middleware/auth');
 const GuildSettings = require('../../utils/Schemas/GuildSettings');
 
 // Route pour obtenir la page des paramètres
-router.get('/guild/:guildId/settings', hasGuildPermission, async (req, res) => {
+router.get('/guild/:guildId/settings', isAuthenticated, hasGuildPermission, async (req, res) => {
     try {
-        const guild = await req.app.client.guilds.fetch(req.params.guildId);
+        const guild = await res.locals.client.guilds.fetch(req.params.guildId);
         
         // Récupération des canaux
         const channels = guild.channels.cache
@@ -45,35 +45,52 @@ router.get('/guild/:guildId/settings', hasGuildPermission, async (req, res) => {
     }
 });
 
-// Route pour sauvegarder tous les paramètres
-router.post('/api/guild/:guildId/settings', hasGuildPermission, async (req, res) => {
+// Route pour sauvegarder les paramètres
+router.post('/api/guild/:guildId/settings', isAuthenticated, hasGuildPermission, async (req, res) => {
     try {
         const guildId = req.params.guildId;
         const settings = req.body;
-
+        
+        // Récupérer ou créer les paramètres du serveur
         const guildSettings = await GuildSettings.getOrCreate(guildId);
         
-        // Mise à jour de la langue
-        guildSettings.locale = settings.language;
-        
-        // Mise à jour des autres paramètres
-        Object.entries(settings).forEach(([key, value]) => {
-            if (key !== 'language') {
-                guildSettings.settings[key] = value;
+        // Mettre à jour la langue si elle est fournie
+        if (settings.language) {
+            guildSettings.locale = settings.language;
+            
+            // Vérifier si le client et locales existent avant d'appeler setGuildLocale
+            if (res.locals.client && res.locals.client.locales) {
+                await res.locals.client.locales.setGuildLocale(guildId, settings.language);
             }
-        });
+        }
+        
+        // Mettre à jour les autres paramètres
+        for (const [key, value] of Object.entries(settings)) {
+            if (key !== 'language') {
+                // Utiliser set() de Map pour les paramètres
+                if (!guildSettings.settings) {
+                    guildSettings.settings = new Map();
+                }
+                guildSettings.settings.set(key, value);
+            }
+        }
 
+        // Marquer settings comme modifié pour MongoDB
+        guildSettings.markModified('settings');
+        
+        // Sauvegarder les modifications
         await guildSettings.save();
 
-        // Mise à jour de la langue dans le client Discord
-        await req.app.client.locales.setGuildLocale(guildId, settings.language);
+        res.json({
+            success: true,
+            message: 'Paramètres sauvegardés avec succès'
+        });
 
-        res.json({ success: true });
     } catch (error) {
-        console.error('Erreur:', error);
-        res.status(500).json({ 
-            error: 'Erreur lors de la sauvegarde des paramètres',
-            details: error.message 
+        console.error('Erreur lors de la sauvegarde des paramètres:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erreur lors de la sauvegarde des paramètres'
         });
     }
 });
@@ -88,10 +105,14 @@ router.patch('/api/guild/:guildId/settings/:setting', hasGuildPermission, async 
 
         if (setting === 'language') {
             guildSettings.locale = value;
-            // Mise à jour de la langue dans le client Discord
-            await req.app.client.locales.setGuildLocale(guildId, value);
+            // Utiliser res.locals.client au lieu de req.app.client
+            await res.locals.client.locales.setGuildLocale(guildId, value);
         } else {
-            await guildSettings.updateSetting(setting, value);
+            if (!guildSettings.settings) {
+                guildSettings.settings = new Map();
+            }
+            guildSettings.settings.set(setting, value);
+            guildSettings.markModified('settings');
         }
 
         await guildSettings.save();
