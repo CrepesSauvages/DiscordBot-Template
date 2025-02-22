@@ -15,6 +15,10 @@ const AliasManager = require('./src/utils/AliasManager');
 const CustomEventManager = require('./src/utils/CustomEvents');
 const LocaleManager = require('./src/utils/LocaleManager');
 
+const DashboardServer = require('./src/dashboard/server');
+
+
+
 const client = new Client({
     intents: 53608447, // Full intents
     partials: [
@@ -68,9 +72,13 @@ require('./src/utils/Handlers/RegistreCommands.js')(client);
 client.logs.info("Starting bot...");
 client.login(client.config.token).then(() => {
     client.logs.success("Bot started successfully!");
+    const dashboard = new DashboardServer(client);
+    dashboard.start();
     client.setMaxListeners(200)
 }).catch((err) => {
     client.logs.error(err);
 });
 
 module.exports = client;
+
+// Après avoir initialisé votre client Discord
