@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { hasGuildPermission } = require('../middleware/auth');
+const GuildSettings = require('../../utils/Schemas/GuildSettings');
 
 // Route principale du serveur
 router.get('/guild/:guildId', hasGuildPermission, async (req, res) => {
