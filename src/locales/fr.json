@@ -19,6 +19,20 @@
                     "duration": "Durée en minutes",
                     "response": "Réponse de la commande"
                 }
+            },
+            "list": {
+                "name": "list",
+                "description": "Lister toutes les commandes temporaires actives",
+                "responses": {
+                    "no_commands": "Aucune commande temporaire active",
+                    "commands_list": "Commandes temporaires actives :\n{{commands}}"
+                }
+            },
+            "delete": {
+                "name": "delete",
+                "description": "Supprimer une commande temporaire",
+                "success": "Commande supprimée avec succès",
+                "not_found": "Commande introuvable"
             }
         },
         "help": {
@@ -44,7 +58,30 @@
     "errors": {
         "missing_permissions": "Vous n'avez pas les permissions nécessaires",
         "command_not_found": "Commande introuvable",
-        "cooldown": "Veuillez attendre {{time}} secondes avant de réutiliser cette commande"
+        "cooldown": "Veuillez attendre {{time}} secondes avant de réutiliser cette commande",
+        "invalid_language": "Langue sélectionnée invalide",
+        "bot_missing_permissions": "Je n'ai pas les permissions nécessaires",
+        "unexpected_error": "Une erreur inattendue s'est produite",
+        "invalid_duration": "Durée spécifiée invalide",
+        "invalid_input": "Entrée invalide"
+    },
+    "common": {
+        "yes": "Oui",
+        "no": "Non",
+        "enabled": "Activé",
+        "disabled": "Désactivé",
+        "success": "Succès",
+        "error": "Erreur",
+        "loading": "Chargement...",
+        "saving": "Sauvegarde...",
+        "done": "Terminé !",
+        "cancelled": "Annulé",
+        "time": {
+            "seconds": "secondes",
+            "minutes": "minutes",
+            "hours": "heures",
+            "days": "jours"
+        }
     },
     "dashboard": {
         "welcome": {
@@ -56,6 +93,29 @@
             "title": "Mes serveurs",
             "manage": "Gérer",
             "setup": "Installer le bot"
+        },
+        "settings": {
+            "title": "Paramètres",
+            "general": {
+                "title": "Général",
+                "language": "Langue",
+                "logChannel": "Salon des logs"
+            },
+            "welcome": {
+                "title": "Message de bienvenue",
+                "message": "Message de bienvenue",
+                "variables": "Variables disponibles : {user} = mention de l'utilisateur, {server} = nom du serveur"
+            },
+            "roles": {
+                "title": "Rôles",
+                "autoRole": "Rôle automatique"
+            },
+            "moderation": {
+                "title": "Modération",
+                "antiSpam": "Anti-Spam",
+                "antiSpamThreshold": "Seuil Anti-Spam (messages)",
+                "antiLink": "Anti-Liens"
+            }
         }
     }
-} 
+}

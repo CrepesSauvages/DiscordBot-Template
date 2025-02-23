@@ -39,6 +39,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Animation des cartes au défilement
+    const observerOptions = {
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    serverCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+    });
+
+    // Effet de survol sur les cartes
+    serverCards.forEach(card => {
+        const banner = card.querySelector('.server-banner');
+        
+        card.addEventListener('mouseenter', () => {
+            banner.style.transform = 'scale(1.05)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            banner.style.transform = 'scale(1)';
+        });
+    });
+
+    // Gestion du thème sombre/clair
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const body = document.body;
+
+    function setTheme(isDark) {
+        if (isDark) {
+            body.classList.add('dark-theme');
+        } else {
+            body.classList.remove('dark-theme');
+        }
+    }
+
+    // Initialiser le thème
+    setTheme(prefersDarkScheme.matches);
+
+    // Écouter les changements de thème système
+    prefersDarkScheme.addListener((e) => setTheme(e.matches));
+
     // Fonction pour afficher les notifications
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');

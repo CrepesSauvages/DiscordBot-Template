@@ -82,5 +82,40 @@
             "hours": "hours",
             "days": "days"
         }
+    },
+    "dashboard": {
+        "welcome": {
+            "title": "Welcome to Dashboard",
+            "subtitle": "Manage your Discord bot easily",
+            "login": "Login with Discord"
+        },
+        "servers": {
+            "title": "My Servers",
+            "manage": "Manage",
+            "setup": "Setup Bot"
+        },
+        "settings": {
+            "title": "Settings",
+            "general": {
+                "title": "General",
+                "language": "Language",
+                "logChannel": "Log Channel"
+            },
+            "welcome": {
+                "title": "Welcome Message",
+                "message": "Welcome Message",
+                "variables": "Available variables: {user} = user mention, {server} = server name"
+            },
+            "roles": {
+                "title": "Roles",
+                "autoRole": "Auto Role"
+            },
+            "moderation": {
+                "title": "Moderation",
+                "antiSpam": "Anti-Spam",
+                "antiSpamThreshold": "Anti-Spam Threshold (messages)",
+                "antiLink": "Anti-Link"
+            }
+        }
     }
-} 
+}

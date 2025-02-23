@@ -43,7 +43,7 @@ client.cooldowns = new Map();
 client.logs = require("./src/utils/logs.js");
 client.commands = new Map();
 client.activeCollectors = new Map();
-client.database = new AdvancedDatabase(client.config.database. mongodb.uri, client.logs);
+client.database = new AdvancedDatabase(client.config.database.mongodb.uri, client.logs);
 client.tempCommands = new TempCommandManager(client);
 client.aliases = new AliasManager(client);
 client.customEvents = new CustomEventManager(client);
@@ -72,9 +72,17 @@ require('./src/utils/Handlers/RegistreCommands.js')(client);
 client.logs.info("Starting bot...");
 client.login(client.config.token).then(() => {
     client.logs.success("Bot started successfully!");
-    const dashboard = new DashboardServer(client);
-    dashboard.start();
-    client.setMaxListeners(200)
+    
+    // Initialiser le dashboard après la connexion du bot
+    try {
+        const dashboard = new DashboardServer(client);
+        client.dashboard = dashboard; // Garder une référence au dashboard
+        dashboard.start();
+    } catch (error) {
+        client.logs.error("Erreur lors du démarrage du dashboard:", error);
+    }
+    
+    client.setMaxListeners(200);
 }).catch((err) => {
     client.logs.error(err);
 });

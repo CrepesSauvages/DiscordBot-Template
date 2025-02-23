@@ -27,6 +27,9 @@ class DashboardServer {
         this.setupPassport();
         this.setupRoutes();
         this.setupErrorHandling();
+        
+        // Démarrer le serveur automatiquement
+        this.start();
     }
 
     setupMiddleware() {
@@ -46,6 +49,12 @@ class DashboardServer {
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cookieParser());
 
+        // CORS
+        this.app.use(cors({
+            origin: ['http://localhost:3000'],
+            credentials: true
+        }));
+
         // Session
         this.app.use(session({
             secret: this.client.config.dashboard.sessionSecret,
@@ -54,7 +63,10 @@ class DashboardServer {
             }),
             resave: false,
             saveUninitialized: false,
-            cookie: this.client.config.dashboard.session.cookie
+            cookie: {
+                maxAge: 24 * 60 * 60 * 1000, // 24 heures
+                secure: process.env.NODE_ENV === 'production'
+            }
         }));
 
         // Passport
@@ -80,9 +92,11 @@ class DashboardServer {
             clientID: this.client.config.app_ip,
             clientSecret: this.client.config.dashboard.clientSecret,
             callbackURL: this.client.config.dashboard.callbackURL,
-            scope: this.client.config.dashboard.oauth2.scopes,
-            prompt: this.client.config.dashboard.oauth2.prompt
+            scope: ['identify', 'guilds'],
+            prompt: 'consent'
         }, (accessToken, refreshToken, profile, done) => {
+            // Stocker le token d'accès pour les futures requêtes
+            profile.accessToken = accessToken;
             process.nextTick(() => done(null, profile));
         }));
     }
@@ -101,11 +115,10 @@ class DashboardServer {
                 // Récupérer les serveurs où le bot est présent
                 const botGuilds = this.client.guilds.cache.map(guild => guild.id);
 
-                res.render('index', {
+                res.render('dashboard', {
                     user: req.user,
                     guilds: guilds,
-                    botGuilds: botGuilds,
-                    clientId: this.client.user.id
+                    botGuilds: botGuilds
                 });
             } catch (error) {
                 console.error('Erreur page d\'accueil:', error);
@@ -117,19 +130,20 @@ class DashboardServer {
         });
 
         // Routes d'authentification
-        this.app.get('/auth/login', passport.authenticate('discord'));
-        this.app.get('/auth/discord/callback', passport.authenticate('discord', {
-            failureRedirect: '/'
-        }), (req, res) => res.redirect('/'));
-        this.app.get('/auth/logout', (req, res) => {
-            req.logout(() => res.redirect('/'));
-        });
+        const authRoutes = require('./routes/auth');
+        this.app.use('/auth', authRoutes);
 
-        // Routes des serveurs
+        // Routes protégées
         const guildRoutes = require('./routes/guild');
         const commandsRoutes = require('./routes/commands');
         const settingsRoutes = require('./routes/settings');
 
+        // Middleware d'authentification pour les routes protégées
+        const { isAuthenticated } = require('./middleware/auth');
+        this.app.use('/dashboard', isAuthenticated);
+        this.app.use('/guild', isAuthenticated);
+
+        // Enregistrement des routes
         this.app.use('/', guildRoutes);
         this.app.use('/', commandsRoutes);
         this.app.use('/', settingsRoutes);
@@ -146,19 +160,25 @@ class DashboardServer {
 
         // Gestion des erreurs
         this.app.use((err, req, res, next) => {
-            this.client.logs.error(`Erreur Dashboard: ${err.stack}`);
+            console.error('Erreur Dashboard:', err);
             res.status(err.status || 500).render('error', {
-                error: err.message,
+                error: err.message || 'Une erreur est survenue',
                 user: req.user
             });
         });
     }
 
     start() {
-        const port = this.client.config.dashboard.port;
+        const port = this.client.config.dashboard.port || 3000;
         this.app.listen(port, () => {
             this.client.logs.success(`Dashboard démarré sur le port ${port}`);
             this.client.logs.info(`URL: http://localhost:${port}`);
+        }).on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                this.client.logs.error(`Le port ${port} est déjà utilisé. Veuillez utiliser un autre port.`);
+            } else {
+                this.client.logs.error(`Erreur lors du démarrage du dashboard: ${error.message}`);
+            }
         });
     }
 }
