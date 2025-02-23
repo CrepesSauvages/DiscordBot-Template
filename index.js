@@ -14,7 +14,7 @@ const TempCommandManager = require('./src/utils/TempCommands');
 const AliasManager = require('./src/utils/AliasManager');
 const CustomEventManager = require('./src/utils/CustomEvents');
 const LocaleManager = require('./src/utils/LocaleManager');
-
+const BackupManager = require('./src/utils/BackupManager.js')
 const DashboardServer = require('./src/dashboard/server');
 
 
@@ -48,7 +48,7 @@ client.tempCommands = new TempCommandManager(client);
 client.aliases = new AliasManager(client);
 client.customEvents = new CustomEventManager(client);
 client.locales = new LocaleManager(client);
-
+client.backupManager = new BackupManager(client);
 
 // [ Modules ] 
 require("./src/utils/Overrides/InteractionOverrides.js")();

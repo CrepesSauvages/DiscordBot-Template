@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --no-warnings index.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,7 @@
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "discord-api-types": "^0.37.119",
     "discord.js": "14.10.2",
     "dotenv": "^16.4.7",

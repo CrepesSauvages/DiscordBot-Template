@@ -3,6 +3,60 @@
         {
             "options": [
                 {
+                    "type": 1,
+                    "name": "create",
+                    "description": "Créer une nouvelle sauvegarde",
+                    "options": [
+                        {
+                            "name": "include_messages",
+                            "description": "Inclure les messages importants?",
+                            "required": false,
+                            "type": 5
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "list",
+                    "description": "Lister les sauvegardes disponibles",
+                    "options": []
+                },
+                {
+                    "type": 1,
+                    "name": "load",
+                    "description": "Charger une sauvegarde",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "backup_id",
+                            "description": "ID de la sauvegarde à restaurer",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "delete",
+                    "description": "Supprimer une sauvegarde",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "backup_id",
+                            "description": "ID de la sauvegarde à supprimer",
+                            "required": true
+                        }
+                    ]
+                }
+            ],
+            "name": "backup",
+            "description": "Gérer les sauvegardes du serveur",
+            "default_member_permissions": "8",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
                     "type": 3,
                     "choices": [
                         {
