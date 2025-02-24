@@ -16,8 +16,7 @@ const CustomEventManager = require('./src/utils/CustomEvents');
 const LocaleManager = require('./src/utils/LocaleManager');
 const BackupManager = require('./src/utils/BackupManager.js')
 const DashboardServer = require('./src/dashboard/server');
-
-
+const LogManager = require('./src/utils/LogManager');
 
 const client = new Client({
     intents: 53608447, // Full intents
@@ -49,6 +48,7 @@ client.aliases = new AliasManager(client);
 client.customEvents = new CustomEventManager(client);
 client.locales = new LocaleManager(client);
 client.backupManager = new BackupManager(client);
+client.logManager = new LogManager(client);
 
 // [ Modules ] 
 require("./src/utils/Overrides/InteractionOverrides.js")();

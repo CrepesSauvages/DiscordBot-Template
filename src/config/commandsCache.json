@@ -85,6 +85,20 @@
         {
             "options": [
                 {
+                    "name": "channel",
+                    "description": "Le canal où seront envoyés les logs",
+                    "required": true,
+                    "type": 7
+                }
+            ],
+            "name": "setlogs",
+            "description": "Définit le canal pour les logs",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
                     "type": 3,
                     "name": "category",
                     "description": "Catégorie spécifique à afficher",
