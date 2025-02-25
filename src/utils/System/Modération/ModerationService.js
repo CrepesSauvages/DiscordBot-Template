@@ -107,11 +107,17 @@ class ModerationService {
             { $sort: { count: -1 } },
             { $limit: 1 }
         ]);
+
+        const actions2 = await WarnModel.aggregate([
+            { $match: { guildId: guild.id, timestamp: { $gte: since } } },
+            { $group: { _id: '$moderatorId', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 1 }
+        ]);
     
-        if (actions.length > 0) {
+        if (actions.length > 0 || actions2.length > 0) {
             stats.mostActivemod = actions[0]._id;
         }
-    
         return stats;
     }
 
