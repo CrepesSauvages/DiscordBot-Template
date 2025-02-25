@@ -10,11 +10,11 @@ const {
 } = Partials;
  
 const { AdvancedDatabase } = require('./src/utils/DataBase/DataBase.js'); 
-const TempCommandManager = require('./src/utils/TempCommands');
-const AliasManager = require('./src/utils/AliasManager');
-const CustomEventManager = require('./src/utils/CustomEvents');
+const TempCommandManager = require('./src/utils/System/TempCommands.js');
+const AliasManager = require('./src/utils/System/AliasManager.js');
+const CustomEventManager = require('./src/utils/System/CustomEvents.js');
 const LocaleManager = require('./src/utils/LocaleManager');
-const BackupManager = require('./src/utils/BackupManager.js')
+const BackupManager = require('./src/utils/System/BackupManager.js')
 const DashboardServer = require('./src/dashboard/server');
 const LogManager = require('./src/utils/LogManager');
 
@@ -58,11 +58,6 @@ require("./src/utils/Overrides/InteractionOverrides.js")();
 require("./src/utils/Init/ProcessHandling.js")();
 require("./src/utils/Init/CheckIntents.js")(client);
 
-
-// [ Handlers ]
-require('./src/utils/Handlers/ComponentLoader.js')(client);
-
-
 // [ Handlers ]
 require('./src/utils/Handlers/ComponentLoader.js')(client);
 require("./src/utils/Handlers/EvenementLoaders.js")(client);
@@ -73,14 +68,9 @@ client.logs.info("Starting bot...");
 client.login(client.config.token).then(() => {
     client.logs.success("Bot started successfully!");
     
-    // Initialiser le dashboard après la connexion du bot
-    try {
-        const dashboard = new DashboardServer(client);
-        client.dashboard = dashboard; // Garder une référence au dashboard
-        dashboard.start();
-    } catch (error) {
-        client.logs.error("Erreur lors du démarrage du dashboard:", error);
-    }
+    const dashboard = new DashboardServer(client);
+    client.dashboard = dashboard; // Garder une référence au dashboard
+    dashboard.start();
     
     client.setMaxListeners(200);
 }).catch((err) => {

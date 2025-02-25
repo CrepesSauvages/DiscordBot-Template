@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
-const BackupManager = require('../../utils/BackupManager');
+const BackupManager = require('../../utils/System/BackupManager');
 
 module.exports = {
     data: new SlashCommandBuilder()

@@ -72,6 +72,16 @@ class LogManager {
         return this.sendLogEmbed(guildId, embed);
     }
 
+    /* 
+    // Exemple d'utilisation
+    await client.logManager.logModAction(interaction.guild.id, {
+        moderator: interaction.user.tag,
+        action: 'Ban',
+        target: `${target.user.tag} (${target.user.id})`,
+        reason: reason,
+        targetAvatar: target.user.displayAvatarURL()
+    }); */
+
     // Logs de messages
     async logMessageDelete(message) {
         if (!message.guild) return;
