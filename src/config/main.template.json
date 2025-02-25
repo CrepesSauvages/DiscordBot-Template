@@ -30,5 +30,38 @@
             }
         ],
         "interval": 15000
+    },
+    "moderation": {
+        "automod": {
+            "warns": {
+                "mute": {
+                    "threshold": 2,
+                    "duration": "24h"
+                },
+                "kick": {
+                    "threshold": 3
+                },
+                "ban": {
+                    "threshold": 4
+                }
+            }
+        }
+    },
+    "dashboard": {
+        "enabled": false,
+        "port": 3000,
+        "clientSecret": "clientSecret",
+        "callbackURL": "http://localhost:3000/auth/discord/callback",
+        "sessionSecret": "sessionSecret",
+        "session": {
+            "cookie": {
+                "maxAge": 86400000,
+                "secure": false
+            }
+        },
+        "oauth2": {
+            "scopes": ["identify", "guilds"],
+            "prompt": "consent"
+        }
     }
 }
