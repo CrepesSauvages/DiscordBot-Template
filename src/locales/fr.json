@@ -53,69 +53,93 @@
                     "description": "Choisir la langue"
                 }
             }
+        },
+        "mute": {
+            "name": "mute",
+            "description": "Mute un utilisateur",
+            "options": {
+                "user": "L'utilisateur à mute",
+                "reason": "Raison du mute",
+                "duration": "Durée du mute (ex: 1h, 1d, 7d) - laissez vide pour permanent"
+            },
+            "log_title": "🔇 Utilisateur Mute",
+            "log_description": "L'utilisateur {{user}} a été mute par {{moderator}}",
+            "success_temp": "{{user}} a été mute pour {{duration}}",
+            "success_perm": "{{user}} a été mute de façon permanente"
+        },
+        "unmute": {
+            "name": "unmute",
+            "description": "Unmute un utilisateur",
+            "options": {
+                "user": "L'utilisateur à unmute",
+                "reason": "Raison du unmute"
+            },
+            "log_title": "🔊 Utilisateur Unmute",
+            "log_description": "L'utilisateur {{user}} a été unmute par {{moderator}}",
+            "success": "{{user}} a été unmute",
+            "not_muted": "Cet utilisateur n'est pas mute"
+        },
+        "mutehistory": {
+            "name": "mutehistory",
+            "description": "Voir l'historique des mutes d'un utilisateur",
+            "options": {
+                "user": "L'utilisateur à vérifier"
+            },
+            "title": "Historique des mutes de {{user}}",
+            "total": "Total: {{count}} mute(s)",
+            "no_mutes": "Cet utilisateur n'a jamais été mute",
+            "mute_number": "Mute {{number}}",
+            "mute_details": "**Raison:** {{reason}}\n**Date:** {{date}}\n**Durée:** {{duration}}\n**Modérateur:** {{moderator}}\n**Status:** {{status}}",
+            "status": {
+                "active": "✅ Actif",
+                "expired": "⏰ Expiré",
+                "revoked": "❌ Révoqué"
+            }
+        }
+    },
+    "moderation": {
+        "service": {
+            "started": "Service de modération démarré",
+            "stopped": "Service de modération arrêté",
+            "auto_unmute_error": "Erreur lors de l'auto-unmute de {{userId}} dans le serveur {{guildId}}: {{error}}",
+            "check_mutes_error": "Erreur lors de la vérification des mutes: {{error}}",
+            "member_not_found": "Membre {{userId}} non trouvé dans le serveur {{guildId}}",
+            "mute_expired_reason": "Mute expiré",
+            "mute_expired_success": "Le mute de {{user}} a expiré",
+            "mute_expired_log_title": "🔊 Mute Expiré",
+            "mute_expired_log_description": "Le mute de {{user}} a expiré",
+            "log_send_error": "Impossible d'envoyer les logs Discord: {{error}}",
+            "handle_expired_mute_error": "Erreur lors de l'auto-unmute de {{userId}}: {{error}}"
         }
     },
     "errors": {
-        "missing_permissions": "Vous n'avez pas les permissions nécessaires",
-        "command_not_found": "Commande introuvable",
-        "cooldown": "Veuillez attendre {{time}} secondes avant de réutiliser cette commande",
-        "invalid_language": "Langue sélectionnée invalide",
-        "bot_missing_permissions": "Je n'ai pas les permissions nécessaires",
-        "unexpected_error": "Une erreur inattendue s'est produite",
-        "invalid_duration": "Durée spécifiée invalide",
-        "invalid_input": "Entrée invalide"
+        "generic": "Une erreur est survenue",
+        "command": {
+            "cooldown": "Veuillez attendre {{time}} avant de réutiliser cette commande",
+            "missing_permissions": "Vous n'avez pas la permission d'utiliser cette commande",
+            "missing_bot_permissions": "Je n'ai pas la permission d'exécuter cette commande",
+            "missing_args": "Arguments manquants",
+            "invalid_args": "Arguments invalides"
+        }
     },
     "common": {
         "yes": "Oui",
         "no": "Non",
         "enabled": "Activé",
         "disabled": "Désactivé",
-        "success": "Succès",
-        "error": "Erreur",
         "loading": "Chargement...",
-        "saving": "Sauvegarde...",
         "done": "Terminé !",
         "cancelled": "Annulé",
+        "user": "Utilisateur",
+        "moderator": "Modérateur",
+        "duration": "Durée",
+        "reason": "Raison",
+        "permanent": "Permanent",
         "time": {
-            "seconds": "secondes",
-            "minutes": "minutes",
-            "hours": "heures",
-            "days": "jours"
-        }
-    },
-    "dashboard": {
-        "welcome": {
-            "title": "Bienvenue sur le Dashboard",
-            "subtitle": "Gérez votre bot Discord facilement",
-            "login": "Se connecter avec Discord"
-        },
-        "servers": {
-            "title": "Mes serveurs",
-            "manage": "Gérer",
-            "setup": "Installer le bot"
-        },
-        "settings": {
-            "title": "Paramètres",
-            "general": {
-                "title": "Général",
-                "language": "Langue",
-                "logChannel": "Salon des logs"
-            },
-            "welcome": {
-                "title": "Message de bienvenue",
-                "message": "Message de bienvenue",
-                "variables": "Variables disponibles : {user} = mention de l'utilisateur, {server} = nom du serveur"
-            },
-            "roles": {
-                "title": "Rôles",
-                "autoRole": "Rôle automatique"
-            },
-            "moderation": {
-                "title": "Modération",
-                "antiSpam": "Anti-Spam",
-                "antiSpamThreshold": "Seuil Anti-Spam (messages)",
-                "antiLink": "Anti-Liens"
-            }
+            "seconds": "{{count}} seconde(s)",
+            "minutes": "{{count}} minute(s)",
+            "hours": "{{count}} heure(s)",
+            "days": "{{count}} jour(s)"
         }
     }
 }

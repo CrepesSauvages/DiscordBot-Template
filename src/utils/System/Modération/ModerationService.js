@@ -12,7 +12,9 @@ class ModerationService {
     start() {
         if (this.checkInterval) return;
         this.checkInterval = setInterval(() => this.checkMutes(), 60000); // Vérifier toutes les minutes
-        this.client.logs.custom('Service de modération démarré', 0x7289DA);
+        this.client.logs.success(
+            this.client.locales.translate('moderation.service.started', this.client.config.defaultLocale)
+        );
     }
 
     // Arrêter le service
@@ -20,59 +22,101 @@ class ModerationService {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
-            this.client.logs.custom('Service de modération arrêté', 0x7289DA);
+            this.client.logs.warn(
+                this.client.locales.translate('moderation.service.stopped', this.client.config.defaultLocale)
+            );
         }
     }
 
     // Vérifier les mutes expirés
     async checkMutes() {
         try {
-            const guilds = await this.client.guilds.fetch();
+            const expiredMutes = await MuteModel.find({
+                active: true,
+                expiresAt: { $lte: new Date() }
+            });
             
-            for (const [guildId, guild] of guilds) {
-                const expiredMutes = await MuteModel.find({
-                    guildId: guildId,
-                    active: true,
-                    expiresAt: { $lte: new Date() }
-                });
-                
-                for (const mute of expiredMutes) {
-                    await this.handleExpiredMute(guild, mute);
+            for (const mute of expiredMutes) {
+                try {
+                    // Désactiver le mute dans la base de données d'abord
+                    mute.active = false;
+                    await mute.save();
+                    
+                    // Ensuite essayer de gérer le unmute Discord
+                    const guild = await this.client.guilds.fetch(mute.guildId);
+                    if (guild) {
+                        await this.handleExpiredMute(guild, mute);
+                    }
+                } catch (error) {
+                    const locale = await this.client.locales.getGuildLocale(mute.guildId);
+                    this.client.logs.error(
+                        this.client.locales.translate('moderation.service.auto_unmute_error', locale, {
+                            userId: mute.userId,
+                            guildId: mute.guildId,
+                            error: error.message
+                        })
+                    );
                 }
             }
         } catch (error) {
-            console.error('Erreur lors de la vérification des mutes:', error);
+            this.client.logs.error(
+                this.client.locales.translate('moderation.service.check_mutes_error', this.client.config.defaultLocale, {
+                    error: error.message
+                })
+            );
         }
     }
 
     // Gérer un mute expiré
     async handleExpiredMute(guild, mute) {
+        const locale = await this.client.locales.getGuildLocale(guild.id);
+        const translate = (key, vars = {}) => this.client.locales.translate(key, locale, vars);
+
         try {
+            // Récupérer le membre
             const member = await guild.members.fetch(mute.userId);
-            await member.timeout(null, 'Mute expiré');
-            mute.active = false;
-            await mute.save();
+            if (!member) {
+                this.client.logs.warn(translate('moderation.service.member_not_found', {
+                    userId: mute.userId,
+                    guildId: guild.id
+                }));
+                return;
+            }
+
+            // Retirer le timeout Discord
+            await member.timeout(null, translate('moderation.service.mute_expired_reason'));
             
             // Log dans le terminal
-            this.client.logs.custom(`🔊 Le mute de ${member.user.tag} a expiré`, 0x00FF00);
+            this.client.logs.success(translate('moderation.service.mute_expired_success', {
+                user: member.user.tag
+            }));
             
-            // Créer l'embed pour les logs Discord
-            const logEmbed = new EmbedBuilder()
-                .setColor('#00FF00')
-                .setTitle('🔊 Mute Expiré')
-                .addFields(
-                    { name: 'Utilisateur', value: `${member.user.tag} (${member.user.id})` },
-                    { name: 'Raison', value: 'Durée du mute expirée' }
-                )
-                .setTimestamp();
-
-            // Envoyer l'embed dans le canal de logs s'il existe
-            const logsChannel = guild.channels.cache.find(channel => channel.name === 'mod-logs');
-            if (logsChannel) {
-                await logsChannel.send({ embeds: [logEmbed] });
+            try {
+                await this.client.logManager.sendLogEmbed(guild.id, {
+                    color: '#00FF00',
+                    title: translate('moderation.service.mute_expired_log_title'),
+                    description: translate('moderation.service.mute_expired_log_description', {
+                        user: member.user.tag
+                    }),
+                    fields: [
+                        { 
+                            name: translate('common.user'),
+                            value: `${member.user.tag} (${member.user.id})`
+                        }
+                    ],
+                    timestamp: new Date()
+                });
+            } catch (logError) {
+                // Si l'envoi des logs échoue, on log juste l'erreur sans interrompre le processus
+                this.client.logs.warn(translate('moderation.service.log_send_error', {
+                    error: logError.message
+                }));
             }
         } catch (error) {
-            console.error(`Erreur lors de l'auto-unmute de ${mute.userId}:`, error);
+            this.client.logs.error(translate('moderation.service.handle_expired_mute_error', {
+                userId: mute.userId,
+                error: error.message
+            }));
         }
     }
 

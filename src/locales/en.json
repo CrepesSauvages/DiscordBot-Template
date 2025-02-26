@@ -9,7 +9,7 @@
         },
         "temp": {
             "name": "temp",
-            "description": "Temporary commands management",
+            "description": "Manage temporary commands",
             "create": {
                 "name": "create",
                 "description": "Create a new temporary command",
@@ -24,21 +24,29 @@
                 "name": "list",
                 "description": "List all active temporary commands",
                 "responses": {
-                    "no_commands": "No temporary commands active",
+                    "no_commands": "No active temporary commands",
                     "commands_list": "Active temporary commands:\n{{commands}}"
                 }
             },
             "delete": {
                 "name": "delete",
                 "description": "Delete a temporary command",
-                "success": "Command successfully deleted",
+                "success": "Command deleted successfully",
                 "not_found": "Command not found"
             }
+        },
+        "help": {
+            "name": "help",
+            "description": "Display commands list",
+            "title": "📚 Commands List",
+            "category_description": "List of commands in {category} category",
+            "invalid_category": "This category doesn't exist",
+            "no_commands": "No commands available"
         },
         "language": {
             "name": "language",
             "description": "Set server language",
-            "success": "Server language has been changed to {{language}}",
+            "success": "Server language has been set to {language}",
             "options": {
                 "locale": {
                     "name": "language",
@@ -46,76 +54,92 @@
                 }
             }
         },
-        "help": {
-            "name": "help",
-            "description": "Display commands list",
-            "title": "📚 Commands List",
-            "category_description": "List of commands in {{category}} category",
-            "invalid_category": "This category doesn't exist",
-            "no_commands": "No commands available"
+        "mute": {
+            "name": "mute",
+            "description": "Mute a user",
+            "options": {
+                "user": "The user to mute",
+                "reason": "Reason for the mute",
+                "duration": "Mute duration (ex: 1h, 1d, 7d) - leave empty for permanent"
+            },
+            "log_title": "🔇 User Muted",
+            "log_description": "User {{user}} has been muted by {{moderator}}",
+            "success_temp": "{{user}} has been muted for {{duration}}",
+            "success_perm": "{{user}} has been permanently muted"
+        },
+        "unmute": {
+            "name": "unmute",
+            "description": "Unmute a user",
+            "options": {
+                "user": "The user to unmute",
+                "reason": "Reason for the unmute"
+            },
+            "log_title": "🔊 User Unmuted",
+            "log_description": "User {{user}} has been unmuted by {{moderator}}",
+            "success": "{{user}} has been unmuted",
+            "not_muted": "This user is not muted"
+        },
+        "mutehistory": {
+            "name": "mutehistory",
+            "description": "View a user's mute history",
+            "options": {
+                "user": "The user to check"
+            },
+            "title": "Mute History for {{user}}",
+            "total": "Total: {{count}} mute(s)",
+            "no_mutes": "This user has never been muted",
+            "mute_number": "Mute {{number}}",
+            "mute_details": "**Reason:** {{reason}}\n**Date:** {{date}}\n**Duration:** {{duration}}\n**Moderator:** {{moderator}}\n**Status:** {{status}}",
+            "status": {
+                "active": "✅ Active",
+                "expired": "⏰ Expired",
+                "revoked": "❌ Revoked"
+            }
+        }
+    },
+    "moderation": {
+        "service": {
+            "started": "Moderation service started",
+            "stopped": "Moderation service stopped",
+            "auto_unmute_error": "Error during auto-unmute of {{userId}} in server {{guildId}}: {{error}}",
+            "check_mutes_error": "Error while checking mutes: {{error}}",
+            "member_not_found": "Member {{userId}} not found in server {{guildId}}",
+            "mute_expired_reason": "Mute expired",
+            "mute_expired_success": "{{user}}'s mute has expired",
+            "mute_expired_log_title": "🔊 Mute Expired",
+            "mute_expired_log_description": "{{user}}'s mute has expired",
+            "log_send_error": "Unable to send Discord logs: {{error}}",
+            "handle_expired_mute_error": "Error during auto-unmute of {{userId}}: {{error}}"
         }
     },
     "errors": {
-        "missing_permissions": "You don't have the required permissions",
-        "command_not_found": "Command not found",
-        "cooldown": "Please wait {{time}} seconds before using this command again",
-        "invalid_language": "Invalid language selected",
-        "bot_missing_permissions": "I don't have the required permissions",
-        "unexpected_error": "An unexpected error occurred",
-        "invalid_duration": "Invalid duration specified",
-        "invalid_input": "Invalid input provided"
+        "generic": "An error occurred",
+        "command": {
+            "cooldown": "Please wait {{time}} before using this command again",
+            "missing_permissions": "You don't have permission to use this command",
+            "missing_bot_permissions": "I don't have permission to execute this command",
+            "missing_args": "Missing arguments",
+            "invalid_args": "Invalid arguments"
+        }
     },
     "common": {
         "yes": "Yes",
         "no": "No",
         "enabled": "Enabled",
         "disabled": "Disabled",
-        "success": "Success",
-        "error": "Error",
         "loading": "Loading...",
-        "saving": "Saving...",
         "done": "Done!",
         "cancelled": "Cancelled",
+        "user": "User",
+        "moderator": "Moderator",
+        "duration": "Duration",
+        "reason": "Reason",
+        "permanent": "Permanent",
         "time": {
-            "seconds": "seconds",
-            "minutes": "minutes",
-            "hours": "hours",
-            "days": "days"
-        }
-    },
-    "dashboard": {
-        "welcome": {
-            "title": "Welcome to Dashboard",
-            "subtitle": "Manage your Discord bot easily",
-            "login": "Login with Discord"
-        },
-        "servers": {
-            "title": "My Servers",
-            "manage": "Manage",
-            "setup": "Setup Bot"
-        },
-        "settings": {
-            "title": "Settings",
-            "general": {
-                "title": "General",
-                "language": "Language",
-                "logChannel": "Log Channel"
-            },
-            "welcome": {
-                "title": "Welcome Message",
-                "message": "Welcome Message",
-                "variables": "Available variables: {user} = user mention, {server} = server name"
-            },
-            "roles": {
-                "title": "Roles",
-                "autoRole": "Auto Role"
-            },
-            "moderation": {
-                "title": "Moderation",
-                "antiSpam": "Anti-Spam",
-                "antiSpamThreshold": "Anti-Spam Threshold (messages)",
-                "antiLink": "Anti-Link"
-            }
+            "seconds": "{{count}} second(s)",
+            "minutes": "{{count}} minute(s)",
+            "hours": "{{count}} hour(s)",
+            "days": "{{count}} day(s)"
         }
     }
 }

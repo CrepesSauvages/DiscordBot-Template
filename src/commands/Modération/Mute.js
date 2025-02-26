@@ -36,7 +36,10 @@ module.exports = {
                 .setDescription('Durée du mute (ex: 1h, 1d, 7d) - laissez vide pour permanent')
                 .setRequired(false)),
     
-    async execute(interaction) {
+    async execute(interaction, client) {
+        const locale = await client.locales.getGuildLocale(interaction.guildId);
+        const translate = (key, vars = {}) => client.locales.translate(key, locale, vars);
+        
         const user = interaction.options.getUser('user');
         const duration = interaction.options.getString('duration');
         const reason = interaction.options.getString('reason');
@@ -66,20 +69,42 @@ module.exports = {
         // Log et réponse
         await interaction.client.logManager.sendLogEmbed(interaction.guild.id, {
             color: '#FF4500',
-            title: '🔇 Utilisateur Mute',
-            description: `L'utilisateur ${user.tag} a été mute.`,
+            title: translate('commands.mute.log_title'),
+            description: translate('commands.mute.log_description', {
+                user: user.tag,
+                moderator: interaction.user.tag
+            }),
             fields: [
-                { name: 'Utilisateur', value: `${user.tag} (${user.id})` },
-                { name: 'Modérateur', value: interaction.user.toString() },
-                { name: 'Durée', value: duration || 'Permanent' },
-                { name: 'Raison', value: reason || 'Aucune raison fournie' }
+                { 
+                    name: translate('common.user'),
+                    value: `${user.tag} (${user.id})`
+                },
+                { 
+                    name: translate('common.moderator'),
+                    value: interaction.user.toString()
+                },
+                { 
+                    name: translate('common.duration'),
+                    value: duration || translate('common.permanent')
+                },
+                { 
+                    name: translate('common.reason'),
+                    value: reason
+                }
             ]
         });
         
-        
         const replyEmbed = new EmbedBuilder()
             .setColor('#FF4500')
-            .setDescription(`${user.toString()} a été mute ${duration ? `pour ${duration}` : 'de façon permanente'}`)
+            .setDescription(
+                translate(
+                    duration ? 'commands.mute.success_temp' : 'commands.mute.success_perm',
+                    {
+                        user: user.toString(),
+                        duration: duration
+                    }
+                )
+            )
             .setTimestamp();
             
         await interaction.reply({ embeds: [replyEmbed] });

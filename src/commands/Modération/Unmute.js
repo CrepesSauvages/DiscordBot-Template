@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const MuteModel = require('../../utils/Schemas/Moderation/Mute.js');
 
 module.exports = {
@@ -16,7 +16,10 @@ module.exports = {
                 .setDescription('Raison du unmute')
                 .setRequired(true)),
     
-    async execute(interaction) {
+    async execute(interaction, client) {
+        const locale = await client.locales.getGuildLocale(interaction.guildId);
+        const translate = (key, vars = {}) => client.locales.translate(key, locale, vars);
+        
         const user = interaction.options.getUser('user');
         const reason = interaction.options.getString('reason');
         
@@ -29,7 +32,7 @@ module.exports = {
         
         if (!mute) {
             return interaction.reply({
-                content: 'Cet utilisateur n\'est pas mute.',
+                content: translate('commands.unmute.not_muted'),
                 ephemeral: true
             });
         }
@@ -41,15 +44,32 @@ module.exports = {
         // Log et réponse
         await interaction.client.logManager.sendLogEmbed(interaction.guild.id, {
             color: '#00FF00',
-            title: '🔊 Utilisateur Unmute',
-            description: `L'utilisateur ${user.tag} a été unmute.`,
+            title: translate('commands.unmute.log_title'),
+            description: translate('commands.unmute.log_description', {
+                user: user.tag,
+                moderator: interaction.user.tag
+            }),
             fields: [
-                { name: 'Utilisateur', value: `${user.tag} (${user.id})` },
-                { name: 'Modérateur', value: interaction.user.toString() },
-                { name: 'Raison', value: reason }
+                { 
+                    name: translate('common.user'),
+                    value: `${user.tag} (${user.id})`
+                },
+                { 
+                    name: translate('common.moderator'),
+                    value: interaction.user.toString()
+                },
+                { 
+                    name: translate('common.reason'),
+                    value: reason
+                }
             ]
         });
         
-        await interaction.reply(`${user.toString()} a été unmute`);
+        const replyEmbed = new EmbedBuilder()
+            .setColor('#00FF00')
+            .setDescription(translate('commands.unmute.success', { user: user.toString() }))
+            .setTimestamp();
+            
+        await interaction.reply({ embeds: [replyEmbed] });
     }
 };

@@ -17,6 +17,7 @@ module.exports = {
 		const response = client.locales.translate('commands.ping.responses.pong', locale, {
 			ms: client.ws.ping
 		});
+
 		
 		await interaction.reply({ content: response, ephemeral: true });
 	}

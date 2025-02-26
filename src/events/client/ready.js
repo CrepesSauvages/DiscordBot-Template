@@ -6,7 +6,7 @@ module.exports = {
     execute: async function (client) {
         client.logs.custom(`🟢 ${client.user.tag} est prêt !`, 0x7946ff);
         client.moderationService = new ModerationService(client);
-        //client.moderationService.start();
+        client.moderationService.start();
 
         if (client.config.activity.dynamic) {
             const activities = client.config.activity.choices.sort((a, b) => a.order - b.order);
