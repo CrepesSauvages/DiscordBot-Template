@@ -1,103 +1,142 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const QuickChart = require('quickchart-js');
 
 module.exports = {
-    clientPerms: ['Administrator'],
+    cooldown: 3,
+    userPerms: ['ModerateMembers'],
     data: new SlashCommandBuilder()
         .setName('modstats')
-        .setDescription('Affiche les statistiques de modération')
+        .setDescription('Afficher les statistiques de modération')
         .addStringOption(option =>
-            option.setName('période')
+            option.setName('period')
                 .setDescription('Période des statistiques')
                 .setRequired(false)
                 .addChoices(
-                    { name: '24 heures', value: '1d' },
+                    { name: '24 heures', value: '24h' },
                     { name: '7 jours', value: '7d' },
-                    { name: '30 jours', value: '30d' }
+                    { name: '30 jours', value: '30d' },
+                    { name: 'Tout', value: 'all' }
                 )),
 
-    async execute(interaction) {
+    async execute(interaction, client) {
         await interaction.deferReply();
 
-        const timeframe = interaction.options.getString('période') || '7d';
-        const stats = await interaction.client.moderationService.getModStats(interaction.guild, timeframe);
+        try {
+            const stats = await client.moderationService.getModStats(interaction.guild.id);
+            if (!stats) {
+                return interaction.editReply('Aucune statistique disponible.');
+            }
 
-        // Créer le graphique en camembert pour les actions
-        const pieChart = new QuickChart();
-        pieChart
-            .setConfig({
-                type: 'pie',
-                data: {
-                    labels: ['Mutes', 'Warns', 'Kicks', 'Bans'],
-                    datasets: [{
-                        data: [stats.mutes, stats.warns, stats.kicks, stats.bans],
-                        backgroundColor: ['#FFA500', '#FFFF00', '#FF4500', '#FF0000']
-                    }]
-                },
-                options: {
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Répartition des Actions de Modération'
-                        }
+            // Filtrer les actions récentes selon la période sélectionnée
+            const period = interaction.options.getString('period') || '30d';
+            const now = new Date();
+            let timeLimit;
+            
+            switch(period) {
+                case '24h':
+                    timeLimit = new Date(now - 24 * 60 * 60 * 1000);
+                    break;
+                case '7d':
+                    timeLimit = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case '30d':
+                    timeLimit = new Date(now - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                default:
+                    timeLimit = new Date(0);
+            }
+
+            const filteredActions = stats.recentActions.filter(action => 
+                action.timestamp > timeLimit
+            );
+
+            // Créer l'embed principal avec les statistiques globales
+            const mainEmbed = new EmbedBuilder()
+                .setColor('#7289DA')
+                .setTitle('📊 Statistiques de Modération')
+                .setDescription(`Statistiques ${period === 'all' ? 'globales' : `des derniers ${period}`}`)
+                .addFields(
+                    { 
+                        name: '📝 Sanctions Totales', 
+                        value: `${stats.totalSanctions}`, 
+                        inline: true 
+                    },
+                    { 
+                        name: '⚠️ Sanctions Actives', 
+                        value: `${stats.activeSanctions}`, 
+                        inline: true 
+                    },
+                    { 
+                        name: '👥 Utilisateurs Sanctionnés', 
+                        value: `${stats.totalCases}`, 
+                        inline: true 
                     }
-                }
-            })
-            .setWidth(400)
-            .setHeight(300)
-            .setBackgroundColor('white');
+                )
+                .setTimestamp();
 
-        // Créer le graphique en barre pour l'évolution dans le temps
-        const timeStats = await interaction.client.moderationService.getTimeBasedStats(interaction.guild, timeframe);
-        const barChart = new QuickChart();
-        barChart
-            .setConfig({
-                type: 'bar',
-                data: {
-                    labels: timeStats.labels,
-                    datasets: [{
-                        label: 'Actions de Modération',
-                        data: timeStats.data,
-                        backgroundColor: '#7289DA'
-                    }]
-                },
-                options: {
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Évolution des Actions de Modération'
-                        }
-                    }
-                }
-            })
-            .setWidth(500)
-            .setHeight(300)
-            .setBackgroundColor('white');
+            // Ajouter les statistiques par type
+            const typeStats = Object.entries(stats.byType)
+                .filter(([, count]) => count > 0)
+                .map(([type, count]) => `${getEmojiForType(type)} ${type}: ${count}`)
+                .join('\n');
 
-        const embed = new EmbedBuilder()
-            .setColor('#7289DA')
-            .setTitle('📊 Statistiques de Modération')
-            .setDescription(`Statistiques sur ${timeframe === '1d' ? 'les dernières 24 heures' : `les ${timeframe.replace('d', ' derniers jours')}`}`)
-            .addFields(
-                { name: 'Total des Actions', value: `${stats.mutes + stats.warns + stats.kicks + stats.bans}`, inline: true },
-                { name: 'Mutes', value: `${stats.mutes}`, inline: true },
-                { name: 'Warns', value: `${stats.warns}`, inline: true },
-                { name: 'Kicks', value: `${stats.kicks}`, inline: true },
-                { name: 'Bans', value: `${stats.bans}`, inline: true }
-            )
-            .setImage(pieChart.getUrl())
-            .setImage(barChart.getUrl())
-            .setTimestamp();
-
-        if (stats.mostActivemod) {
-            const modUser = await interaction.client.users.fetch(stats.mostActivemod);
-            embed.addFields({ 
-                name: 'Modérateur le Plus Actif', 
-                value: modUser.tag, 
-                inline: false 
+            mainEmbed.addFields({
+                name: '📊 Actions par Type',
+                value: typeStats || 'Aucune action',
+                inline: false
             });
-        }
 
-        await interaction.editReply({ embeds: [embed] });
-    },
+            // Ajouter les statistiques des modérateurs
+            if (stats.topModerator) {
+                const topMod = await interaction.guild.members.fetch(stats.topModerator).catch(() => null);
+                const topModStats = stats.moderators[stats.topModerator];
+                mainEmbed.addFields({
+                    name: '👑 Modérateur le Plus Actif',
+                    value: `${topMod ? topMod.user.tag : stats.topModerator}\n` +
+                        `Total: ${topModStats.total} actions\n` +
+                        Object.entries(topModStats.byType)
+                            .map(([type, count]) => `${getEmojiForType(type)} ${type}: ${count}`)
+                            .join('\n'),
+                    inline: false
+                });
+            }
+
+            // Ajouter les actions récentes
+            if (filteredActions.length > 0) {
+                const recentActionsField = await Promise.all(
+                    filteredActions.slice(0, 5).map(async action => {
+                        const mod = await interaction.guild.members.fetch(action.moderatorId).catch(() => null);
+                        const user = await interaction.guild.members.fetch(action.userId).catch(() => null);
+                        return `${getEmojiForType(action.type)} ${action.type} - ` +
+                            `${user ? user.user.tag : action.userId} par ` +
+                            `${mod ? mod.user.tag : action.moderatorId}\n` +
+                            `<t:${Math.floor(action.timestamp.getTime() / 1000)}:R>`;
+                    })
+                );
+
+                mainEmbed.addFields({
+                    name: '🕒 Actions Récentes',
+                    value: recentActionsField.join('\n'),
+                    inline: false
+                });
+            }
+
+            await interaction.editReply({ embeds: [mainEmbed] });
+
+        } catch (error) {
+            console.error('Erreur lors de la récupération des statistiques:', error);
+            await interaction.editReply('Une erreur est survenue lors de la récupération des statistiques.');
+        }
+    }
 };
+
+// Fonction utilitaire pour obtenir l'emoji correspondant au type de sanction
+function getEmojiForType(type) {
+    const emojis = {
+        WARN: '⚠️',
+        MUTE: '🔇',
+        UNMUTE: '🔊',
+        BAN: '🔨',
+        KICK: '👢'
+    };
+    return emojis[type] || '❓';
+}

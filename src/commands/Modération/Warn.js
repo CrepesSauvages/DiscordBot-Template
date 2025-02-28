@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const WarnModel = require('../../utils/Schemas/Moderation/Warn.js');
+const { ModCase, generateSanctionId } = require('../../utils/Schemas/Moderation/ModCase.js');
 const config = require('../../config/main.json');
 
 module.exports = {
@@ -25,9 +25,9 @@ module.exports = {
                     option.setName('duration')
                     .setDescription('Durée du warn (ex: 7d, 24h, 30m)')
                     .setRequired(false))
-                .addStringOption(option =>
+                .addAttachmentOption(option =>
                     option.setName('proof')
-                        .setDescription('URL de la preuve (optionnel)')))
+                        .setDescription('Image ou fichier de preuve (optionnel)')))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('remove')
@@ -99,7 +99,7 @@ function parseDuration(duration) {
 
 // Fonction pour appliquer les sanctions automatiques
 async function applyAutoModeration(interaction, user, activeWarns) {
-    const warnCount = activeWarns.length;
+    const warnCount = activeWarns;
     const automodConfig = config.moderation.automod.warns;
     
     if (warnCount >= automodConfig.ban.threshold) {
@@ -153,141 +153,184 @@ async function applyAutoModeration(interaction, user, activeWarns) {
 async function handleAddWarn(interaction, client) {
     const user = interaction.options.getUser('user');
     const reason = interaction.options.getString('reason');
-    const proof = interaction.options.getString('proof');
     const duration = interaction.options.getString('duration');
-    
-    // Convertir la durée
-    const durationMs = parseDuration(duration);
-    const expiresAt = durationMs ? new Date(Date.now() + durationMs) : null;
-    
-    const warnId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    const warn = new WarnModel({
-        warnId: warnId,
-        userId: user.id,
-        moderatorId: interaction.user.id,
-        reason: reason,
-        proof: proof || 'Aucune preuve fournie',
-        guildId: interaction.guild.id,
-        expiresAt: expiresAt
-    });
+    const proofAttachment = interaction.options.getAttachment('proof');
+    const proof = proofAttachment ? proofAttachment.url : 'Aucune preuve fournie';
 
-    await warn.save();
+    if (user.id === interaction.user.id) 
+        return interaction.reply({ content: 'Vous ne pouvez pas vous avertir vous-même.', ephemeral: true });
+    if (user.bot)
+        return interaction.reply({ content: 'Vous ne pouvez pas avertir un bot.', ephemeral: true });
 
-    // Obtenir les warns actifs
-    const activeWarns = await WarnModel.getActiveWarns(user.id, interaction.guild.id);
-    
-    // Appliquer les sanctions automatiques
-    await applyAutoModeration(interaction, user, activeWarns);
+    let expiresAt = null;
+    if (duration) {
+        const durationMs = parseDuration(duration);
+        if (!durationMs) {
+            return interaction.reply({ content: 'Format de durée invalide. Utilisez : 1d, 1h, 1m', ephemeral: true });
+        }
+        expiresAt = new Date(Date.now() + durationMs);
+    }
 
-    // Log l'action
-    await client.logManager.sendLogEmbed(interaction.guild.id, {
-        color: '#FF0000',
-        title: '⚠️ Nouvel Avertissement',
-        description: `Un avertissement a été ajouté pour ${user.toString()}`,
-        fields: [
-            { name: 'Modérateur', value: `${interaction.user.tag}`, inline: true },
-            { name: 'Utilisateur', value: `${user.tag} (${user.id})`, inline: true },
-            { name: 'ID de l\'avertissement', value: warnId, inline: true },
-            { name: 'Raison', value: reason },
-            { name: 'Preuve', value: proof || 'Aucune preuve fournie' },
-            { name: 'Expire', value: expiresAt ? `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>` : 'Jamais' }
-        ],
-        thumbnail: user.displayAvatarURL()
-    });
+    try {
+        const sanctionData = {
+            type: 'WARN',
+            reason: reason,
+            proof: proof,
+            moderatorId: interaction.user.id,
+            expiresAt: expiresAt,
+            expired: false
+        };
 
-    const embed = new EmbedBuilder()
-        .setColor('#FF0000')
-        .setTitle('⚠️ Nouvel Avertissement')
-        .setDescription(`Un avertissement a été ajouté pour ${user.toString()}`)
-        .addFields(
-            { name: 'ID de l\'avertissement', value: warnId },
-            { name: 'Raison', value: reason },
-            { name: 'Preuve', value: proof || 'Aucune preuve fournie' },
-            { name: 'Modérateur', value: interaction.user.toString() },
-            { name: 'Expire', value: expiresAt ? `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>` : 'Jamais' }
-        )
-        .setTimestamp();
+        const modCase = await ModCase.addSanction(user.id, interaction.guild.id, sanctionData);
+        const newSanction = modCase.sanctions[modCase.sanctions.length - 1];
+        
+        const embed = new EmbedBuilder()
+            .setColor('#FF9900') // Couleur warning en hexadécimal
+            .setTitle('⚠️ Avertissement')
+            .setDescription(`${user} a été averti`)
+            .addFields(
+                { name: 'ID de Sanction', value: newSanction.sanctionId },
+                { name: 'Raison', value: reason },
+                { name: 'Modérateur', value: `${interaction.user}` },
+                { name: 'Expiration', value: expiresAt ? `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>` : 'Jamais' },
+                { name: 'Total Warns', value: `${modCase.totalWarns}` }
+            )
+            .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+        if (proof !== 'Aucune preuve fournie') {
+            embed.addFields({ name: 'Preuve', value: proof });
+        }
+
+        await interaction.reply({ embeds: [embed] });
+        await applyAutoModeration(interaction, user, modCase.totalWarns);
+
+        // Log l'action
+        await client.logManager.sendLogEmbed(interaction.guild.id, {
+            color: '#FF0000',
+            title: '⚠️ Nouvel Avertissement',
+            description: `Un avertissement a été ajouté pour ${user.toString()}`,
+            fields: [
+                { name: 'Modérateur', value: `${interaction.user.tag}`, inline: true },
+                { name: 'Utilisateur', value: `${user.tag} (${user.id})`, inline: true },
+                { name: 'ID de Sanction', value: newSanction.sanctionId, inline: true },
+                { name: 'Raison', value: reason },
+                { name: 'Preuve', value: proof || 'Aucune preuve fournie' },
+                { name: 'Expire', value: expiresAt ? `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>` : 'Jamais' }
+            ],
+            thumbnail: user.displayAvatarURL()
+        });
+
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout du warn:', error);
+        await interaction.reply({ content: 'Une erreur est survenue lors de l\'ajout de l\'avertissement.', ephemeral: true });
+    }
 }
 
 async function handleRemoveWarn(interaction, client) {
-    const warnId = interaction.options.getString('warnid');
-    
-    const warn = await WarnModel.findOneAndDelete({ 
-        warnId: warnId, 
-        guildId: interaction.guild.id 
-    });
-    
-    if (!warn) {
-        return interaction.reply({
-            content: '❌ Avertissement non trouvé.',
-            ephemeral: true
+    const sanctionId = interaction.options.getString('warnid');
+
+    try {
+        const modCase = await ModCase.removeSanction(interaction.guild.id, sanctionId);
+        
+        if (!modCase) {
+            return interaction.reply({ 
+                content: 'Avertissement non trouvé ou déjà supprimé.',
+                ephemeral: true 
+            });
+        }
+
+        // Log l'action
+        await client.logManager.sendLogEmbed(interaction.guild.id, {
+            color: '#00FF00',
+            title: '✅ Avertissement Retiré',
+            description: `L'avertissement ${sanctionId} a été retiré`,
+            fields: [
+                { name: 'Modérateur', value: `${interaction.user.tag}`, inline: true },
+                { name: 'Utilisateur', value: `<@${modCase.userId}> (${modCase.userId})`, inline: true },
+                { name: 'ID de Sanction', value: sanctionId, inline: true },
+                { name: 'Warns Restants', value: `${modCase.totalWarns}` }
+            ]
+        });
+
+        const embed = new EmbedBuilder()
+            .setColor('#00FF00') // Couleur success en hexadécimal
+            .setTitle('✅ Avertissement Retiré')
+            .setDescription(`L'avertissement ${sanctionId} a été retiré avec succès.`)
+            .addFields(
+                { name: 'Utilisateur', value: `<@${modCase.userId}>` },
+                { name: 'Modérateur', value: `${interaction.user}` },
+                { name: 'Warns Restants', value: `${modCase.totalWarns}` }
+            )
+            .setTimestamp();
+
+        await interaction.reply({ embeds: [embed] });
+
+    } catch (error) {
+        console.error('Erreur lors de la suppression du warn:', error);
+        await interaction.reply({ 
+            content: 'Une erreur est survenue lors de la suppression de l\'avertissement.',
+            ephemeral: true 
         });
     }
-
-    // Log l'action
-    await client.logManager.sendLogEmbed(interaction.guild.id, {
-        color: '#00FF00',
-        title: '✅ Avertissement Retiré',
-        description: `L'avertissement ${warnId} a été retiré`,
-        fields: [
-            { name: 'Modérateur', value: `${interaction.user.tag}`, inline: true },
-            { name: 'Utilisateur', value: `<@${warn.userId}> (${warn.userId})`, inline: true },
-            { name: 'ID de l\'avertissement', value: warnId, inline: true },
-            { name: 'Raison originale', value: warn.reason }
-        ]
-    });
-
-    const embed = new EmbedBuilder()
-        .setColor('#00FF00')
-        .setTitle('✅ Avertissement Retiré')
-        .setDescription(`L'avertissement ${warnId} a été retiré`)
-        .setTimestamp();
-
-    await interaction.reply({ embeds: [embed] });
 }
 
 async function handleListWarn(interaction) {
     const user = interaction.options.getUser('user');
-    
-    const warns = await WarnModel.find({ 
-        userId: user.id,
-        guildId: interaction.guild.id
-    }).sort({ timestamp: -1 });
 
-    if (warns.length === 0) {
-        return interaction.reply({
-            content: `${user.toString()} n'a aucun avertissement.`,
-            ephemeral: true
+    try {
+        const modCase = await ModCase.findOne({
+            userId: user.id,
+            guildId: interaction.guild.id
+        });
+
+        if (!modCase || modCase.sanctions.length === 0) {
+            return interaction.reply({
+                content: `${user} n'a aucun avertissement.`,
+                ephemeral: true
+            });
+        }
+
+        const activeWarns = modCase.sanctions.filter(s => 
+            s.type === 'WARN' && (!s.expired && (!s.expiresAt || s.expiresAt > new Date()))
+        );
+
+        const embed = new EmbedBuilder()
+            .setColor('#7289DA') // Couleur primary en hexadécimal
+            .setTitle(`Avertissements de ${user.tag}`)
+            .setDescription(`Total: ${modCase.totalWarns} | Actifs: ${activeWarns.length}`)
+            .setTimestamp();
+
+        activeWarns.forEach((warn) => {
+            embed.addFields({
+                name: `Warn ID: ${warn.sanctionId}`,
+                value: `
+                    **Raison:** ${warn.reason}
+                    **Modérateur:** <@${warn.moderatorId}>
+                    **Date:** <t:${Math.floor(warn.timestamp.getTime() / 1000)}:R>
+                    ${warn.expiresAt ? `**Expire:** <t:${Math.floor(warn.expiresAt.getTime() / 1000)}:R>` : '**Expire:** Jamais'}
+                `
+            });
+        });
+
+        await interaction.reply({ embeds: [embed] });
+
+    } catch (error) {
+        console.error('Erreur lors de la liste des warns:', error);
+        await interaction.reply({ 
+            content: 'Une erreur est survenue lors de la récupération des avertissements.',
+            ephemeral: true 
         });
     }
-
-    const embed = new EmbedBuilder()
-        .setColor('#0099FF')
-        .setTitle(`Avertissements de ${user.tag}`)
-        .setDescription(`Total: ${warns.length} avertissement(s)`)
-        .setTimestamp();
-
-    warns.forEach((warn) => {
-        embed.addFields({
-            name: `Avertissement ${warn.warnId}`,
-            value: `**Raison:** ${warn.reason}\n**Date:** <t:${Math.floor(warn.timestamp.getTime() / 1000)}:R>\n**Modérateur:** <@${warn.moderatorId}>\n**Preuve:** ${warn.proof}\n**Expire:** ${warn.expiresAt ? `<t:${Math.floor(warn.expiresAt.getTime() / 1000)}:R>` : 'Jamais'}`
-        });
-    });
-
-    await interaction.reply({ embeds: [embed] });
 }
 
 async function handleExpiredWarns(interaction) {
     const user = interaction.options.getUser('user');
     
-    const expiredWarns = await WarnModel.getExpiredWarns(user.id, interaction.guild.id);
+    const expiredWarns = await ModCase.getExpiredWarns(user.id, interaction.guild.id);
 
     if (expiredWarns.length === 0) {
         return interaction.reply({
-            content: `${user.toString()} n'a aucun avertissement expiré.`,
+            content: `${user} n'a aucun avertissement expiré.`,
             ephemeral: true
         });
     }
@@ -300,7 +343,7 @@ async function handleExpiredWarns(interaction) {
 
     expiredWarns.forEach((warn) => {
         embed.addFields({
-            name: `Avertissement ${warn.warnId}`,
+            name: `Avertissement ${warn.sanctionId}`,
             value: `**Raison:** ${warn.reason}\n**Date:** <t:${Math.floor(warn.timestamp.getTime() / 1000)}:R>\n**Expiré le:** <t:${Math.floor(warn.expiresAt.getTime() / 1000)}:R>\n**Modérateur:** <@${warn.moderatorId}>`
         });
     });
@@ -309,31 +352,36 @@ async function handleExpiredWarns(interaction) {
 }
 
 async function handleRecentWarns(interaction) {
-    const recentWarns = await WarnModel.find({ 
-        guildId: interaction.guild.id 
-    })
-    .sort({ timestamp: -1 })
-    .limit(10);
+    try {
+        const recentWarns = await ModCase.findRecentWarns(interaction.guild.id, 10);
 
-    if (recentWarns.length === 0) {
-        return interaction.reply({
-            content: 'Aucun avertissement récent.',
+        if (!recentWarns || recentWarns.length === 0) {
+            return interaction.reply({
+                content: 'Aucun avertissement récent trouvé.',
+                ephemeral: true
+            });
+        }
+
+        const embed = new EmbedBuilder()
+            .setColor('#7289DA')
+            .setTitle('Avertissements Récents')
+            .setDescription(`Les ${recentWarns.length} derniers avertissements`)
+            .setTimestamp();
+
+        recentWarns.forEach((warn) => {
+            embed.addFields({
+                name: `Avertissement ${warn.sanctionId}`,
+                value: `**Utilisateur:** <@${warn.userId}>\n**Raison:** ${warn.reason}\n**Date:** <t:${Math.floor(warn.timestamp.getTime() / 1000)}:R>\n**Modérateur:** <@${warn.moderatorId}>\n**Expire:** ${warn.expiresAt ? `<t:${Math.floor(warn.expiresAt.getTime() / 1000)}:R>` : 'Jamais'}`
+            });
+        });
+
+        await interaction.reply({ embeds: [embed] });
+
+    } catch (error) {
+        console.error('Erreur lors de la récupération des warns récents:', error);
+        await interaction.reply({
+            content: 'Une erreur est survenue lors de la récupération des avertissements récents.',
             ephemeral: true
         });
     }
-
-    const embed = new EmbedBuilder()
-        .setColor('#FFFF00')
-        .setTitle('Avertissements Récents')
-        .setDescription(`Les ${recentWarns.length} derniers avertissements`)
-        .setTimestamp();
-
-    recentWarns.forEach((warn) => {
-        embed.addFields({
-            name: `Avertissement ${warn.warnId}`,
-            value: `**Utilisateur:** <@${warn.userId}>\n**Raison:** ${warn.reason}\n**Date:** <t:${Math.floor(warn.timestamp.getTime() / 1000)}:R>\n**Modérateur:** <@${warn.moderatorId}>\n**Expire:** ${warn.expiresAt ? `<t:${Math.floor(warn.expiresAt.getTime() / 1000)}:R>` : 'Jamais'}`
-        });
-    });
-
-    await interaction.reply({ embeds: [embed] });
 }
