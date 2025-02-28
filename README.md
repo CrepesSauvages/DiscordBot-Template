@@ -7,13 +7,18 @@ Un bot Discord modulaire et extensible avec gestion des commandes temporaires, d
 - ⚡ Système de commandes slash avec gestion des sous-commandes
 - ⏱️ Commandes temporaires avec durée configurable
 - 🔄 Alias de commandes
-- 🌍 Support multilingue (FR, EN, ES)
+- 🌍 Support multilingue (FR, EN)
 - 🛡️ Système de permissions avancé
 - 🎯 Gestion des cooldowns
 - 📊 Base de données MongoDB intégrée
 - 🔌 Système de composants (boutons, menus, modals)
 - 📝 Logs détaillés
 - 🔄 Rechargement à chaud des commandes
+- 👮 Système de modération avancé
+  - Mute temporaire et permanent
+  - Historique des mutes
+  - Auto-unmute
+  - Logs de modération multilingues
 
 ## 📋 Prérequis
 
@@ -67,6 +72,11 @@ node .
 - `/temp delete` : Supprimer une commande temporaire
 - `/temp extend` : Prolonger la durée d'une commande temporaire
 
+## 🛡️ Commandes de modération
+- `/mute` : Mute un utilisateur (temporairement ou de forme permanente)
+- `/unmute` : Unmute un utilisateur
+- `/mutehistory` : Voir l'historique des mutes d'un utilisateur
+
 ## 📁 Structure du projet
     ├── index.js
     ├── package.json
@@ -78,9 +88,13 @@ node .
         │   │   ├── restricted.js
         │   │   ├── temp_manager.js
         │   │   └── test_bot.js
-        │   └── Utils/
-        │       ├── help.js
-        │       └── ping.js
+        ├── Modération/
+        │   ├── mute.js
+        │   ├── unmute.js
+        │   └── mutehistory.js
+        └── Utils/
+            ├── help.js
+            └── ping.js
         ├── components/ # Composants interactifs
         │   ├── buttons/
         │   ├── menus/
@@ -89,10 +103,12 @@ node .
         ├── events/ # Gestionnaires d'événements
         ├── locales/ # Fichiers de traduction
         │   ├── en.json
-        │   ├── fr.json
-        │   └── es.json
+        │   └── fr.json
         └── utils/ # Utilitaires et helpers
             ├── LocaleManager.js
+            ├── System/
+            │   └── Modération/
+            │       └── ModerationService.js
             └── ... autres utilitaires ...
 
 ## 🛠️ Développement
@@ -110,6 +126,7 @@ module.exports = {
         // Votre code ici
     }
 };
+
 ```
 
 ### Ajouter des traductions
@@ -127,6 +144,14 @@ module.exports = {
     }
 }
 ```
+
+## 📝 Logs et Traductions
+Le bot utilise un système de logs avancé qui supporte :
+
+- Logs dans la console avec codes couleurs
+- Logs dans des canaux Discord spécifiques
+- Support multilingue pour tous les messages
+- Formatage automatique des embeds
 
 ## 📜 License
 
