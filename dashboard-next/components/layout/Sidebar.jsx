@@ -189,7 +189,7 @@ export function Sidebar() {
               {openMenus.settings && (
                 <div className="ml-8 mt-1 space-y-1">
                   <Link 
-                    href="/settings/profile"
+                    href="/profile"
                     className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-discord-light-gray"
                   >
                     <span className="truncate">Profil</span>
