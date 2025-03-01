@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #23272A;
+  --card: #f9fafb;
+  --card-foreground: #23272A;
+  --primary: #5865F2;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --accent: #EB459E;
+  --accent-foreground: #ffffff;
+  --destructive: #ED4245;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #5865F2;
+}
+
+.dark {
+  --background: #1E2124;
+  --foreground: #ffffff;
+  --card: #2C2F33;
+  --card-foreground: #ffffff;
+  --primary: #5865F2;
+  --primary-foreground: #ffffff;
+  --secondary: #23272A;
+  --secondary-foreground: #f9fafb;
+  --accent: #EB459E;
+  --accent-foreground: #ffffff;
+  --destructive: #ED4245;
+  --destructive-foreground: #ffffff;
+  --border: #2C2F33;
+  --input: #2C2F33;
+  --ring: #5865F2;
+}
+
+body {
+  @apply bg-white dark:bg-discord-darker-gray text-gray-900 dark:text-white;
+}

@@ -1,4 +1,4 @@
-const ModCase = require('../../Schemas/Moderation/ModCase');
+const ModCase = require('../../Schemas/Moderation/ModCase').ModCase;
 
 class ModerationService {
     constructor(client) {

@@ -1,0 +1,70 @@
+{
+    "token": "MTAxNDMwNTA3ODk5NzQyMjExMQ.G73SKn.z9TiwiMrNNENETIOsELXK2YL0eIr9Okw1Jt2D8",
+    "app_ip": "1014305078997422111",
+    "dev_guild_id": "1197542985601138708",
+    "prefix": "!",
+    "devs": ["562667788645171201"],
+    "ownerID": "562667788645171201",
+    "database": {
+        "mongodb": {
+            "uri": "mongodb://admin:admin@raspberrypi.local:27017/bottemplate?authSource=admin"
+        }
+    },
+    "activity": {
+        "dynamic": false,
+        "choices": [
+            {
+                "name": "🟢 En ligne",
+                "type": "PLAYING",
+                "status": "online",
+                "order": 3
+            },
+            {
+                "name": "🟠 En développement",
+                "type": "WATCHING",
+                "status": "idle",
+                "order": 1
+            },
+            {
+                "name": "🔴 En maintenance",
+                "type": "LISTENING",
+                "status": "dnd",
+                "order": 3
+            }
+        ],
+        "interval": 15000
+    },
+    "moderation": {
+        "automod": {
+            "warns": {
+                "mute": {
+                    "threshold": 2,
+                    "duration": "24h"
+                },
+                "kick": {
+                    "threshold": 3
+                },
+                "ban": {
+                    "threshold": 4
+                }
+            }
+        }
+    },
+    "dashboard": {
+        "enabled": true,
+        "port": 3001,
+        "clientSecret": "X6-CrCUTXJwUiIHsoBqgv3am9ab_7EFc",
+        "callbackURL": "http://localhost:3001/api/auth/discord/callback",
+        "sessionSecret": "b7c1d8f2e3a6940bd5e7f9c2a4d8e3f6a1b9c7d5e2f4a8b3c6d9e1f7a2b5c8d4e6f3a9b7c1d8f2e3a6940bd5e7f9c2",
+        "session": {
+            "cookie": {
+                "maxAge": 86400000,
+                "secure": false
+            }
+        },
+        "oauth2": {
+            "scopes": ["identify", "guilds"],
+            "prompt": "consent"
+        }
+    }
+}

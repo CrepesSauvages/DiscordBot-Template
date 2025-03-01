@@ -107,6 +107,21 @@ module.exports = function (client, folder = null) {
                         break;
                     case 'commands':
                         if (!data.data) throw 'No data property found';
+                        
+                        // Extraire la catégorie à partir du chemin du fichier
+                        const pathParts = filePath.split('/');
+                        const commandsIndex = pathParts.indexOf('commands');
+                        let categoryFromPath = 'Général';
+                        
+                        if (commandsIndex !== -1 && commandsIndex + 1 < pathParts.length) {
+                            categoryFromPath = pathParts[commandsIndex + 1];
+                            // Première lettre en majuscule
+                            categoryFromPath = categoryFromPath.charAt(0).toUpperCase() + categoryFromPath.slice(1);
+                        }
+                        
+                        // Ajouter la catégorie à l'objet de commande
+                        data.categoryFromPath = categoryFromPath;
+                        
                         addComponent(client[moduleKey], data.data.name, data);
                         for (const alias of data.aliases) {
                             addComponent(client[moduleKey], alias, { ...data, data: { ...data.data, name: alias } });
