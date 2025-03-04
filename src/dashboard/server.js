@@ -78,7 +78,7 @@ class DashboardServer {
         
         // CORS - Autoriser les requêtes depuis le frontend Next.js
         this.app.use(cors({
-            origin: ['http://localhost:3000', 'http://localhost:3001'],
+            origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
             credentials: true,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization']
@@ -203,7 +203,7 @@ class DashboardServer {
 
         // Configuration CORS spécifique pour l'API
         this.app.use('/api', (req, res, next) => {
-            res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+            res.header('Access-Control-Allow-Origin', 'http://localhost:3002');
             res.header('Access-Control-Allow-Credentials', 'true');
             res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
             res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -311,6 +311,64 @@ class DashboardServer {
             } catch (error) {
                 console.error('Erreur API stats:', error);
                 res.status(500).json({ error: 'Erreur lors de la récupération des statistiques' });
+            }
+        });
+
+        // API pour récupérer les paramètres d'un serveur
+        this.app.get('/api/guilds/:id/settings', isAuthenticated, hasGuildPermissions, async (req, res) => {
+            try {
+                const { id } = req.params;
+                
+                // Récupérer les paramètres depuis MongoDB
+                const GuildSettings = require('../utils/Schemas/GuildSettings');
+                const guildSettings = await GuildSettings.getOrCreate(id);
+                
+                // Convertir la Map en objet pour la réponse JSON
+                const settings = {
+                    locale: guildSettings.locale,
+                };
+                
+                // Ajouter les paramètres personnalisés
+                guildSettings.settings.forEach((value, key) => {
+                    settings[key] = value;
+                });
+                
+                res.json(settings);
+            } catch (error) {
+                console.error('Erreur API guild settings:', error);
+                res.status(500).json({ error: 'Erreur lors de la récupération des paramètres du serveur' });
+            }
+        });
+
+        // API pour mettre à jour les paramètres d'un serveur
+        this.app.post('/api/guilds/:id/settings', isAuthenticated, hasGuildPermissions, async (req, res) => {
+            try {
+                const { id } = req.params;
+                const updatedSettings = req.body;
+                
+                // Récupérer les paramètres depuis MongoDB
+                const GuildSettings = require('../utils/Schemas/GuildSettings');
+                const guildSettings = await GuildSettings.getOrCreate(id);
+                
+                // Mettre à jour la locale si elle est fournie
+                if (updatedSettings.locale) {
+                    guildSettings.locale = updatedSettings.locale;
+                }
+                
+                // Mettre à jour les paramètres personnalisés
+                for (const [key, value] of Object.entries(updatedSettings)) {
+                    if (key !== 'locale' && key !== 'guildId' && key !== '_id') {
+                        guildSettings.settings.set(key, value);
+                    }
+                }
+                
+                // Sauvegarder les modifications
+                await guildSettings.save();
+                
+                res.json({ success: true });
+            } catch (error) {
+                console.error('Erreur API update guild settings:', error);
+                res.status(500).json({ error: 'Erreur lors de la mise à jour des paramètres du serveur' });
             }
         });
     }

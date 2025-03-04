@@ -1,4 +1,4 @@
-import cookie from 'cookie';
+import * as cookie from 'cookie';
 
 export default function handler(req, res) {
   // Vérifier si c'est une requête POST

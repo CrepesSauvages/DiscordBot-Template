@@ -1,89 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { FaDiscord } from 'react-icons/fa';
+import { FiLogIn } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { getAuthUrl } from '../lib/auth';
 
 export default function Login() {
   const router = useRouter();
-  const [error, setError] = useState('');
-  const [authUrl, setAuthUrl] = useState('');
-
+  
+  // Rediriger vers Discord OAuth si le paramètre 'code' est présent dans l'URL
   useEffect(() => {
-    // Générer l'URL d'authentification Discord
-    const url = getAuthUrl();
-    setAuthUrl(url);
-    
-    // Vérifier s'il y a une erreur dans l'URL
-    if (router.query.error) {
-      const errorType = router.query.error;
-      
-      if (errorType === 'auth_failed') {
-        setError('L\'authentification a échoué. Veuillez réessayer.');
-      } else if (errorType === 'backend_unavailable') {
-        setError('Le serveur backend n\'est pas accessible. Assurez-vous qu\'il est en cours d\'exécution.');
-      } else if (errorType === 'no_code') {
-        setError('Aucun code d\'autorisation n\'a été reçu. Veuillez réessayer.');
-      } else {
-        setError('Une erreur s\'est produite. Veuillez réessayer.');
-      }
+    if (router.query.code) {
+      router.push('/api/auth/discord/callback?code=' + router.query.code);
     }
-  }, [router.query]);
+  }, [router]);
 
+  // Fonction pour rediriger vers l'URL d'authentification Discord
   const handleLogin = () => {
-    if (authUrl) {
-      window.location.href = authUrl;
-    } else {
-      setError('Impossible de générer l\'URL d\'authentification. Veuillez réessayer.');
-    }
+    window.location.href = getAuthUrl();
   };
 
   return (
     <>
       <Head>
-        <title>Connexion - Dashboard Bot Discord</title>
-        <meta name="description" content="Connectez-vous au dashboard de votre bot Discord" />
+        <title>Connexion | Discord Bot Dashboard</title>
       </Head>
       
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-discord-dark">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-md w-full space-y-8 p-10 bg-white dark:bg-gray-800 rounded-xl shadow-md"
+          className="max-w-md w-full bg-white dark:bg-discord-dark-gray rounded-lg shadow-lg overflow-hidden"
         >
-          <div className="text-center">
-            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-              Dashboard Bot Discord
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Connectez-vous avec Discord pour accéder au dashboard
-            </p>
+          <div className="bg-discord-blurple py-6 px-8 text-center">
+            <h1 className="text-2xl font-bold text-white">Discord Bot Dashboard</h1>
+            <p className="text-discord-light-gray mt-2">Connectez-vous pour accéder au dashboard</p>
           </div>
           
-          {error && (
-            <div className="text-red-500 text-sm mb-4">
-              {error}
-            </div>
-          )}
-          
-          <div className="mt-8">
+          <div className="p-8">
+            <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">
+              Utilisez votre compte Discord pour vous connecter et gérer votre bot.
+            </p>
+            
             <button
               onClick={handleLogin}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="w-full flex items-center justify-center bg-discord-blurple hover:bg-discord-blurple-dark text-white font-medium py-3 px-4 rounded-md transition-colors"
             >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <FaDiscord className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" />
-              </span>
-              Connexion avec Discord
+              <FiLogIn className="mr-2" />
+              Se connecter avec Discord
             </button>
-          </div>
-          
-          <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>
-              En vous connectant, vous acceptez de partager vos informations Discord avec ce dashboard.
-            </p>
           </div>
         </motion.div>
       </div>

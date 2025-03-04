@@ -1,4 +1,4 @@
-import { parseCookies, isAuthenticated, getUserInfo } from '../../../../lib/auth';
+import { parseCookies, isAuthenticated, getUserInfo } from '../../../lib/auth';
 
 export default async function handler(req, res) {
   // Vérifier si c'est une requête GET

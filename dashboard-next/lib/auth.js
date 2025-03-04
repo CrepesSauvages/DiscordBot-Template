@@ -8,7 +8,7 @@ const DISCORD_API = 'https://discord.com/api/v10';
 const config = {
   clientId: process.env.NEXT_PUBLIC_CLIENT_ID || '1014305078997422111',
   clientSecret: process.env.CLIENT_SECRET || 'X6-CrCUTXJwUiIHsoBqgv3am9ab_7EFc',
-  redirectUri: 'http://localhost:3000/api/auth/discord/callback',
+  redirectUri: 'http://localhost:3002/api/auth/discord/callback',
   scope: 'identify guilds',
 };
 
