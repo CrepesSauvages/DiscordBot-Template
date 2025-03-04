@@ -21,79 +21,103 @@ module.exports = {
 
         const timeframe = interaction.options.getString('période') || '7d';
         const stats = await interaction.client.moderationService.getModStats(interaction.guild, timeframe);
-
-        // Créer le graphique en camembert pour les actions
-        const pieChart = new QuickChart();
-        pieChart
-            .setConfig({
-                type: 'pie',
-                data: {
-                    labels: ['Mutes', 'Warns', 'Kicks', 'Bans'],
-                    datasets: [{
-                        data: [stats.mutes, stats.warns, stats.kicks, stats.bans],
-                        backgroundColor: ['#FFA500', '#FFFF00', '#FF4500', '#FF0000']
-                    }]
-                },
-                options: {
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Répartition des Actions de Modération'
-                        }
-                    }
-                }
-            })
-            .setWidth(400)
-            .setHeight(300)
-            .setBackgroundColor('white');
-
-        // Créer le graphique en barre pour l'évolution dans le temps
         const timeStats = await interaction.client.moderationService.getTimeBasedStats(interaction.guild, timeframe);
-        const barChart = new QuickChart();
-        barChart
-            .setConfig({
-                type: 'bar',
-                data: {
-                    labels: timeStats.labels,
-                    datasets: [{
-                        label: 'Actions de Modération',
-                        data: timeStats.data,
-                        backgroundColor: '#7289DA'
-                    }]
+
+        // Créer un seul graphique combiné
+        const chart = new QuickChart();
+        chart.setConfig({
+            type: 'bar',
+            data: {
+                labels: timeStats.labels,
+                datasets: [
+                    {
+                        label: 'Mutes',
+                        data: timeStats.muteData,
+                        backgroundColor: '#FFA500'
+                    },
+                    {
+                        label: 'Warns',
+                        data: timeStats.warnData,
+                        backgroundColor: '#FFFF00'
+                    },
+                    {
+                        label: 'Kicks',
+                        data: timeStats.kickData,
+                        backgroundColor: '#FF4500'
+                    },
+                    {
+                        label: 'Bans',
+                        data: timeStats.banData,
+                        backgroundColor: '#FF0000'
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Actions de Modération',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
                 },
-                options: {
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Évolution des Actions de Modération'
-                        }
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true
                     }
                 }
-            })
-            .setWidth(500)
-            .setHeight(300)
-            .setBackgroundColor('white');
+            }
+        })
+        .setWidth(800)
+        .setHeight(400)
+        .setBackgroundColor('white');
 
         const embed = new EmbedBuilder()
             .setColor('#7289DA')
             .setTitle('📊 Statistiques de Modération')
             .setDescription(`Statistiques sur ${timeframe === '1d' ? 'les dernières 24 heures' : `les ${timeframe.replace('d', ' derniers jours')}`}`)
             .addFields(
-                { name: 'Total des Actions', value: `${stats.mutes + stats.warns + stats.kicks + stats.bans}`, inline: true },
-                { name: 'Mutes', value: `${stats.mutes}`, inline: true },
-                { name: 'Warns', value: `${stats.warns}`, inline: true },
-                { name: 'Kicks', value: `${stats.kicks}`, inline: true },
-                { name: 'Bans', value: `${stats.bans}`, inline: true }
+                { 
+                    name: '📈 Total des Actions', 
+                    value: `${stats.total}`, 
+                    inline: false 
+                },
+                { 
+                    name: '🔇 Mutes', 
+                    value: `${stats.mutes} (${Math.round(stats.mutes/stats.total*100)}%)`, 
+                    inline: true 
+                },
+                { 
+                    name: '⚠️ Warns', 
+                    value: `${stats.warns} (${Math.round(stats.warns/stats.total*100)}%)`, 
+                    inline: true 
+                },
+                { 
+                    name: '👢 Kicks', 
+                    value: `${stats.kicks} (${Math.round(stats.kicks/stats.total*100)}%)`, 
+                    inline: true 
+                },
+                { 
+                    name: '🔨 Bans', 
+                    value: `${stats.bans} (${Math.round(stats.bans/stats.total*100)}%)`, 
+                    inline: true 
+                }
             )
-            .setImage(pieChart.getUrl())
-            .setImage(barChart.getUrl())
+            .setImage(chart.getUrl())
             .setTimestamp();
 
         if (stats.mostActivemod) {
             const modUser = await interaction.client.users.fetch(stats.mostActivemod);
             embed.addFields({ 
-                name: 'Modérateur le Plus Actif', 
-                value: modUser.tag, 
+                name: '👮 Modérateur le Plus Actif', 
+                value: `${modUser.tag} (${stats.mostActivemodActions} actions)`, 
                 inline: false 
             });
         }

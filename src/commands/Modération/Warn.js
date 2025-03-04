@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 const WarnModel = require('../../utils/Schemas/Moderation/Warn.js');
 const config = require('../../config/main.json');
+const ModCase = require('../../utils/Schemas/Moderation/ModCase.js');
 
 module.exports = {
     cooldown: 3,
@@ -57,25 +58,37 @@ module.exports = {
                 .setName('recent')
                 .setDescription('Voir les avertissements récents')),
 
-    async execute(interaction) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
+        
+        if (subcommand === 'add') {
+            const user = interaction.options.getUser('user');
+            const reason = interaction.options.getString('reason');
+            const proof = interaction.options.getString('proof');
+            const duration = interaction.options.getString('duration');
 
-        switch (subcommand) {
-            case 'add':
-                await handleAddWarn(interaction, interaction.client);
-                break;
-            case 'remove':
-                await handleRemoveWarn(interaction, interaction.client);
-                break;
-            case 'list':
-                await handleListWarn(interaction);
-                break;
-            case 'expired':
-                await handleExpiredWarns(interaction);
-                break;
-            case 'recent':
-                await handleRecentWarns(interaction);
-                break;
+            // Utiliser le ModerationService
+            const sanctions = await client.moderationService.getUserSanctions(user.id, interaction.guild.id);
+            
+            // Ajouter le warn via le service
+            await client.moderationService.addWarn(interaction, user, {
+                reason,
+                proof,
+                duration
+            });
+
+            // Vérifier les sanctions automatiques
+            await client.moderationService.applyAutoModeration(interaction, user, sanctions);
+
+        } else if (subcommand === 'remove') {
+            const warnId = interaction.options.getString('warnid');
+            await client.moderationService.removeWarn(interaction, warnId);
+        } else if (subcommand === 'list') {
+            await handleListWarn(interaction);
+        } else if (subcommand === 'expired') {
+            await handleExpiredWarns(interaction);
+        } else if (subcommand === 'recent') {
+            await handleRecentWarns(interaction);
         }
     }
 };
@@ -160,25 +173,27 @@ async function handleAddWarn(interaction, client) {
     const durationMs = parseDuration(duration);
     const expiresAt = durationMs ? new Date(Date.now() + durationMs) : null;
     
-    const warnId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    const warn = new WarnModel({
-        warnId: warnId,
-        userId: user.id,
-        moderatorId: interaction.user.id,
-        reason: reason,
-        proof: proof || 'Aucune preuve fournie',
-        guildId: interaction.guild.id,
-        expiresAt: expiresAt
-    });
-
-    await warn.save();
-
-    // Obtenir les warns actifs
-    const activeWarns = await WarnModel.getActiveWarns(user.id, interaction.guild.id);
-    
-    // Appliquer les sanctions automatiques
-    await applyAutoModeration(interaction, user, activeWarns);
+    // Créer ou mettre à jour le ModCase
+    const modCase = await ModCase.findOneAndUpdate(
+        { guildId: interaction.guild.id, userId: user.id },
+        {
+            $setOnInsert: {
+                nombre: await ModCase.getNextNumber(interaction.guild.id, user.id)
+            },
+            $push: {
+                sanction: {
+                    type: 'WARN',
+                    moderatorId: interaction.user.id,
+                    reason: reason,
+                    proof: proof || 'Aucune preuve fournie',
+                    duration: durationMs,
+                    expiresAt: expiresAt,
+                    active: true
+                }
+            }
+        },
+        { upsert: true, new: true }
+    );
 
     // Log l'action
     await client.logManager.sendLogEmbed(interaction.guild.id, {
@@ -188,28 +203,12 @@ async function handleAddWarn(interaction, client) {
         fields: [
             { name: 'Modérateur', value: `${interaction.user.tag}`, inline: true },
             { name: 'Utilisateur', value: `${user.tag} (${user.id})`, inline: true },
-            { name: 'ID de l\'avertissement', value: warnId, inline: true },
             { name: 'Raison', value: reason },
             { name: 'Preuve', value: proof || 'Aucune preuve fournie' },
             { name: 'Expire', value: expiresAt ? `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>` : 'Jamais' }
         ],
         thumbnail: user.displayAvatarURL()
     });
-
-    const embed = new EmbedBuilder()
-        .setColor('#FF0000')
-        .setTitle('⚠️ Nouvel Avertissement')
-        .setDescription(`Un avertissement a été ajouté pour ${user.toString()}`)
-        .addFields(
-            { name: 'ID de l\'avertissement', value: warnId },
-            { name: 'Raison', value: reason },
-            { name: 'Preuve', value: proof || 'Aucune preuve fournie' },
-            { name: 'Modérateur', value: interaction.user.toString() },
-            { name: 'Expire', value: expiresAt ? `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>` : 'Jamais' }
-        )
-        .setTimestamp();
-
-    await interaction.reply({ embeds: [embed] });
 }
 
 async function handleRemoveWarn(interaction, client) {

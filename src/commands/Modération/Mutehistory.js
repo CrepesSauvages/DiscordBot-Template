@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const MuteModel = require('../../utils/Schemas/Moderation/Mute.js');
+const ModCase = require('../../utils/Schemas/Moderation/ModCase.js');
 
 // Fonction pour formater la durée en format lisible
 function formatDuration(ms, translate) {
@@ -33,44 +33,44 @@ module.exports = {
         
         const user = interaction.options.getUser('user');
         
-        const mutes = await MuteModel.find({
+        const modCases = await ModCase.find({
             userId: user.id,
-            guildId: interaction.guild.id
-        }).sort({ timestamp: -1 });
+            guildId: interaction.guild.id,
+            'sanction.type': 'MUTE'
+        });
         
-        if (mutes.length === 0) {
+        if (!modCases.length) {
             return interaction.reply({
                 content: translate('commands.mutehistory.no_mutes'),
                 ephemeral: true
             });
         }
         
+        const muteHistory = modCases.flatMap(mc => 
+            mc.sanction
+                .filter(s => s.type === 'MUTE')
+                .map(s => ({
+                    moderator: s.moderatorId,
+                    reason: s.reason,
+                    date: s.createdAt,
+                    duration: s.duration,
+                    active: s.active
+                }))
+        ).sort((a, b) => b.date - a.date);
+        
         const embed = new EmbedBuilder()
             .setColor('#FF4500')
             .setTitle(translate('commands.mutehistory.title', { user: user.tag }))
-            .setDescription(translate('commands.mutehistory.total', { count: mutes.length }))
+            .setDescription(translate('commands.mutehistory.total', { count: muteHistory.length }))
             .setTimestamp();
-        
-        mutes.forEach((mute, index) => {
-            if (index < 25) { // Limite de 25 champs
-                const status = mute.active 
-                    ? (mute.expiresAt && mute.expiresAt < new Date() 
-                        ? translate('commands.mutehistory.status.expired')
-                        : translate('commands.mutehistory.status.active'))
-                    : translate('commands.mutehistory.status.revoked');
-
-                embed.addFields({
-                    name: translate('commands.mutehistory.mute_number', { number: index + 1 }),
-                    value: translate('commands.mutehistory.mute_details', {
-                        reason: mute.reason,
-                        date: `<t:${Math.floor(mute.timestamp.getTime() / 1000)}:R>`,
-                        duration: formatDuration(mute.duration, translate),
-                        moderator: `<@${mute.moderatorId}>`,
-                        status: status
-                    })
-                });
-            }
-        });
+            
+        for (const mute of muteHistory.slice(0, 25)) {
+            embed.addFields({
+                name: `${new Date(mute.date).toLocaleDateString()}`,
+                value: `**Modérateur:** <@${mute.moderator}>\n**Raison:** ${mute.reason}\n**Durée:** ${mute.duration ? formatDuration(mute.duration, translate) : 'Permanent'}\n**Statut:** ${mute.active ? 'Actif' : 'Inactif'}`,
+                inline: false
+            });
+        }
         
         await interaction.reply({ embeds: [embed] });
     }

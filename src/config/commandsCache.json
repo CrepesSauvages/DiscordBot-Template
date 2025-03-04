@@ -99,6 +99,99 @@
         {
             "options": [
                 {
+                    "type": 1,
+                    "name": "view",
+                    "description": "Voir la configuration actuelle",
+                    "options": []
+                },
+                {
+                    "type": 1,
+                    "name": "toggle",
+                    "description": "Activer/désactiver l'automod",
+                    "options": [
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Tout",
+                                    "value": "all"
+                                },
+                                {
+                                    "name": "Mute",
+                                    "value": "mute"
+                                },
+                                {
+                                    "name": "Kick",
+                                    "value": "kick"
+                                },
+                                {
+                                    "name": "Ban",
+                                    "value": "ban"
+                                }
+                            ],
+                            "name": "type",
+                            "description": "Type de sanction",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "threshold",
+                    "description": "Modifier les seuils",
+                    "options": [
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Mute",
+                                    "value": "mute"
+                                },
+                                {
+                                    "name": "Kick",
+                                    "value": "kick"
+                                },
+                                {
+                                    "name": "Ban",
+                                    "value": "ban"
+                                }
+                            ],
+                            "name": "type",
+                            "description": "Type de sanction",
+                            "required": true
+                        },
+                        {
+                            "max_value": 20,
+                            "min_value": 1,
+                            "type": 4,
+                            "name": "amount",
+                            "description": "Nombre de sanctions avant action",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "muteduration",
+                    "description": "Modifier la durée du mute automatique",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "duration",
+                            "description": "Durée (ex: 1h, 1d, 7d)",
+                            "required": true
+                        }
+                    ]
+                }
+            ],
+            "name": "automod",
+            "description": "Configurer l'automod",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
                     "type": 3,
                     "choices": [
                         {
@@ -141,7 +234,7 @@
                 {
                     "type": 3,
                     "name": "duration",
-                    "description": "Durée du mute (ex: 1h, 1d, 7d) - laissez vide pour permanent",
+                    "description": "Durée du mute (ex: 1h, 1d, 7d)",
                     "required": false
                 }
             ],
