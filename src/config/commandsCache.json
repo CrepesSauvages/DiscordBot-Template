@@ -99,6 +99,164 @@
         {
             "options": [
                 {
+                    "type": 3,
+                    "choices": [
+                        {
+                            "name": "24 heures",
+                            "value": "1d"
+                        },
+                        {
+                            "name": "7 jours",
+                            "value": "7d"
+                        },
+                        {
+                            "name": "30 jours",
+                            "value": "30d"
+                        }
+                    ],
+                    "name": "période",
+                    "description": "Période des statistiques",
+                    "required": false
+                }
+            ],
+            "name": "modstats",
+            "description": "Affiche les statistiques de modération",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "name": "user",
+                    "description": "L'utilisateur à mute",
+                    "required": true,
+                    "type": 6
+                },
+                {
+                    "type": 3,
+                    "name": "reason",
+                    "description": "Raison du mute",
+                    "required": true
+                },
+                {
+                    "type": 3,
+                    "name": "duration",
+                    "description": "Durée du mute (ex: 1h, 1d, 7d)",
+                    "required": false
+                }
+            ],
+            "name": "mute",
+            "description": "Mute un utilisateur",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "name": "user",
+                    "description": "L'utilisateur à unmute",
+                    "required": true,
+                    "type": 6
+                },
+                {
+                    "type": 3,
+                    "name": "reason",
+                    "description": "Raison du unmute",
+                    "required": true
+                }
+            ],
+            "name": "unmute",
+            "description": "Unmute un utilisateur",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "type": 1,
+                    "name": "add",
+                    "description": "Ajouter un avertissement",
+                    "options": [
+                        {
+                            "name": "user",
+                            "description": "L'utilisateur à avertir",
+                            "required": true,
+                            "type": 6
+                        },
+                        {
+                            "type": 3,
+                            "name": "reason",
+                            "description": "Raison de l'avertissement",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "duration",
+                            "description": "Durée du warn (ex: 7d, 24h, 30m)",
+                            "required": false
+                        },
+                        {
+                            "type": 3,
+                            "name": "proof",
+                            "description": "URL de la preuve (optionnel)",
+                            "required": false
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "remove",
+                    "description": "Retirer un avertissement",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "warnid",
+                            "description": "ID de l'avertissement",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "list",
+                    "description": "Voir les avertissements d'un utilisateur",
+                    "options": [
+                        {
+                            "name": "user",
+                            "description": "L'utilisateur à vérifier",
+                            "required": true,
+                            "type": 6
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "expired",
+                    "description": "Voir les avertissements expirés",
+                    "options": [
+                        {
+                            "name": "user",
+                            "description": "L'utilisateur à vérifier",
+                            "required": true,
+                            "type": 6
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "recent",
+                    "description": "Voir les avertissements récents",
+                    "options": []
+                }
+            ],
+            "name": "warn",
+            "description": "Système de gestion des avertissements",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
                     "type": 1,
                     "name": "view",
                     "description": "Voir la configuration actuelle",
@@ -192,168 +350,14 @@
         {
             "options": [
                 {
-                    "type": 3,
-                    "choices": [
-                        {
-                            "name": "24 heures",
-                            "value": "24h"
-                        },
-                        {
-                            "name": "7 jours",
-                            "value": "7d"
-                        },
-                        {
-                            "name": "30 jours",
-                            "value": "30d"
-                        },
-                        {
-                            "name": "Tout",
-                            "value": "all"
-                        }
-                    ],
-                    "name": "period",
-                    "description": "Période des statistiques",
-                    "required": false
-                }
-            ],
-            "name": "modstats",
-            "description": "Afficher les statistiques de modération",
-            "dm_permission": false,
-            "type": 1
-        },
-        {
-            "options": [
-                {
                     "name": "user",
-                    "description": "L'utilisateur à rendre muet",
+                    "description": "L'utilisateur à vérifier",
                     "required": true,
                     "type": 6
-                },
-                {
-                    "type": 3,
-                    "name": "duration",
-                    "description": "Durée du mute (ex: 7d, 24h, 30m)",
-                    "required": true
-                },
-                {
-                    "type": 3,
-                    "name": "reason",
-                    "description": "Raison du mute",
-                    "required": true
-                },
-                {
-                    "type": 3,
-                    "name": "duration",
-                    "description": "Durée du mute (ex: 1h, 1d, 7d)",
-                    "required": false
                 }
             ],
-            "name": "mute",
-            "description": "Rendre muet un utilisateur",
-            "dm_permission": false,
-            "type": 1
-        },
-        {
-            "options": [
-                {
-                    "name": "user",
-                    "description": "L'utilisateur à démuter",
-                    "required": true,
-                    "type": 6
-                },
-                {
-                    "type": 3,
-                    "name": "reason",
-                    "description": "Raison du unmute",
-                    "required": true
-                }
-            ],
-            "name": "unmute",
-            "description": "Retirer le mute d'un utilisateur",
-            "dm_permission": false,
-            "type": 1
-        },
-        {
-            "options": [
-                {
-                    "type": 1,
-                    "name": "add",
-                    "description": "Ajouter un avertissement",
-                    "options": [
-                        {
-                            "name": "user",
-                            "description": "L'utilisateur à avertir",
-                            "required": true,
-                            "type": 6
-                        },
-                        {
-                            "type": 3,
-                            "name": "reason",
-                            "description": "Raison de l'avertissement",
-                            "required": true
-                        },
-                        {
-                            "type": 3,
-                            "name": "duration",
-                            "description": "Durée du warn (ex: 7d, 24h, 30m)",
-                            "required": false
-                        },
-                        {
-                            "name": "proof",
-                            "description": "Image ou fichier de preuve (optionnel)",
-                            "required": false,
-                            "type": 11
-                        }
-                    ]
-                },
-                {
-                    "type": 1,
-                    "name": "remove",
-                    "description": "Retirer un avertissement",
-                    "options": [
-                        {
-                            "type": 3,
-                            "name": "warnid",
-                            "description": "ID de l'avertissement",
-                            "required": true
-                        }
-                    ]
-                },
-                {
-                    "type": 1,
-                    "name": "list",
-                    "description": "Voir les avertissements d'un utilisateur",
-                    "options": [
-                        {
-                            "name": "user",
-                            "description": "L'utilisateur à vérifier",
-                            "required": true,
-                            "type": 6
-                        }
-                    ]
-                },
-                {
-                    "type": 1,
-                    "name": "expired",
-                    "description": "Voir les avertissements expirés",
-                    "options": [
-                        {
-                            "name": "user",
-                            "description": "L'utilisateur à vérifier",
-                            "required": true,
-                            "type": 6
-                        }
-                    ]
-                },
-                {
-                    "type": 1,
-                    "name": "recent",
-                    "description": "Voir les avertissements récents",
-                    "options": []
-                }
-            ],
-            "name": "warn",
-            "description": "Système de gestion des avertissements",
+            "name": "mutehistory",
+            "description": "Voir l'historique des mutes d'un utilisateur",
             "dm_permission": false,
             "type": 1
         },

@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const WarnModel = require('../../utils/Schemas/Moderation/Warn.js');
 const config = require('../../config/main.json');
 const ModCase = require('../../utils/Schemas/Moderation/ModCase.js');
 

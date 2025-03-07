@@ -1,6 +1,4 @@
 const { EmbedBuilder } = require('discord.js');
-const MuteModel = require('../../Schemas/Moderation/Mute');
-const WarnModel = require('../../Schemas/Moderation/Warn');
 const ModCase = require('../../Schemas/Moderation/ModCase');
 const AutomodConfig = require('../../Schemas/Settings/AutomodConfig');
 
