@@ -8,5 +8,5 @@ logs/
 .env
 .npm
 
-#src/config/main.json
+src/config/main.json
 src/config/commandsCache.json
