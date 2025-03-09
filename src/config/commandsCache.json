@@ -103,7 +103,7 @@
                     "choices": [
                         {
                             "name": "24 heures",
-                            "value": "24h"
+                            "value": "1d"
                         },
                         {
                             "name": "7 jours",
@@ -112,19 +112,15 @@
                         {
                             "name": "30 jours",
                             "value": "30d"
-                        },
-                        {
-                            "name": "Tout",
-                            "value": "all"
                         }
                     ],
-                    "name": "period",
+                    "name": "période",
                     "description": "Période des statistiques",
                     "required": false
                 }
             ],
             "name": "modstats",
-            "description": "Afficher les statistiques de modération",
+            "description": "Affiche les statistiques de modération",
             "dm_permission": false,
             "type": 1
         },
@@ -132,15 +128,9 @@
             "options": [
                 {
                     "name": "user",
-                    "description": "L'utilisateur à rendre muet",
+                    "description": "L'utilisateur à mute",
                     "required": true,
                     "type": 6
-                },
-                {
-                    "type": 3,
-                    "name": "duration",
-                    "description": "Durée du mute (ex: 7d, 24h, 30m)",
-                    "required": true
                 },
                 {
                     "type": 3,
@@ -149,14 +139,14 @@
                     "required": true
                 },
                 {
-                    "name": "proof",
-                    "description": "Image ou fichier de preuve (optionnel)",
-                    "required": false,
-                    "type": 11
+                    "type": 3,
+                    "name": "duration",
+                    "description": "Durée du mute (ex: 1h, 1d, 7d)",
+                    "required": false
                 }
             ],
             "name": "mute",
-            "description": "Rendre muet un utilisateur",
+            "description": "Mute un utilisateur",
             "dm_permission": false,
             "type": 1
         },
@@ -164,7 +154,7 @@
             "options": [
                 {
                     "name": "user",
-                    "description": "L'utilisateur à démuter",
+                    "description": "L'utilisateur à unmute",
                     "required": true,
                     "type": 6
                 },
@@ -176,7 +166,7 @@
                 }
             ],
             "name": "unmute",
-            "description": "Retirer le mute d'un utilisateur",
+            "description": "Unmute un utilisateur",
             "dm_permission": false,
             "type": 1
         },
@@ -206,10 +196,10 @@
                             "required": false
                         },
                         {
+                            "type": 3,
                             "name": "proof",
-                            "description": "Image ou fichier de preuve (optionnel)",
-                            "required": false,
-                            "type": 11
+                            "description": "URL de la preuve (optionnel)",
+                            "required": false
                         }
                     ]
                 },
@@ -261,6 +251,113 @@
             ],
             "name": "warn",
             "description": "Système de gestion des avertissements",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "type": 1,
+                    "name": "view",
+                    "description": "Voir la configuration actuelle",
+                    "options": []
+                },
+                {
+                    "type": 1,
+                    "name": "toggle",
+                    "description": "Activer/désactiver l'automod",
+                    "options": [
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Tout",
+                                    "value": "all"
+                                },
+                                {
+                                    "name": "Mute",
+                                    "value": "mute"
+                                },
+                                {
+                                    "name": "Kick",
+                                    "value": "kick"
+                                },
+                                {
+                                    "name": "Ban",
+                                    "value": "ban"
+                                }
+                            ],
+                            "name": "type",
+                            "description": "Type de sanction",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "threshold",
+                    "description": "Modifier les seuils",
+                    "options": [
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Mute",
+                                    "value": "mute"
+                                },
+                                {
+                                    "name": "Kick",
+                                    "value": "kick"
+                                },
+                                {
+                                    "name": "Ban",
+                                    "value": "ban"
+                                }
+                            ],
+                            "name": "type",
+                            "description": "Type de sanction",
+                            "required": true
+                        },
+                        {
+                            "max_value": 20,
+                            "min_value": 1,
+                            "type": 4,
+                            "name": "amount",
+                            "description": "Nombre de sanctions avant action",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "muteduration",
+                    "description": "Modifier la durée du mute automatique",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "duration",
+                            "description": "Durée (ex: 1h, 1d, 7d)",
+                            "required": true
+                        }
+                    ]
+                }
+            ],
+            "name": "automod",
+            "description": "Configurer l'automod",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "name": "user",
+                    "description": "L'utilisateur à vérifier",
+                    "required": true,
+                    "type": 6
+                }
+            ],
+            "name": "mutehistory",
+            "description": "Voir l'historique des mutes d'un utilisateur",
             "dm_permission": false,
             "type": 1
         },

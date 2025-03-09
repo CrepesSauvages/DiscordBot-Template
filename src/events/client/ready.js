@@ -1,12 +1,10 @@
 const { ActivityType } = require("discord.js"); // Ajoute cette importation
-const ModerationService = require("../../utils/System/Modération/ModerationService");
+
 
 module.exports = {
     name: 'ready',
     execute: async function (client) {
         client.logs.custom(`🟢 ${client.user.tag} est prêt !`, 0x7946ff);
-        client.moderationService = new ModerationService(client);
-        //client.moderationService.start();
 
         if (client.config.activity.dynamic) {
             const activities = client.config.activity.choices.sort((a, b) => a.order - b.order);
