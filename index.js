@@ -17,8 +17,6 @@ const LocaleManager = require('./src/utils/LocaleManager');
 const BackupManager = require('./src/utils/System/BackupManager.js')
 const DashboardServer = require('./src/dashboard/server');
 const LogManager = require('./src/utils/LogManager');
-const ModerationService = require("./src/utils/System/Modération/ModerationService");
-
 
 const client = new Client({
     intents: 53608447, // Full intents
@@ -51,8 +49,6 @@ client.customEvents = new CustomEventManager(client);
 client.locales = new LocaleManager(client);
 client.backupManager = new BackupManager(client);
 client.logManager = new LogManager(client);
-client.moderationService = new ModerationService(client);
-client.moderationService.start();
 
 // [ Modules ] 
 require("./src/utils/Overrides/InteractionOverrides.js")();
