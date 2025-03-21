@@ -72,7 +72,7 @@ client.login(client.config.token).then(() => {
     client.dashboard = dashboard; // Garder une référence au dashboard
     dashboard.start();
     
-    client.setMaxListeners(200);
+    client.setMaxListeners(250);
 }).catch((err) => {
     client.logs.error(err);
 });
