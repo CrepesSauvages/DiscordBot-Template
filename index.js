@@ -66,13 +66,13 @@ require('./src/utils/Handlers/RegistreCommands.js')(client);
 
 client.logs.info("Starting bot...");
 client.login(client.config.token).then(() => {
-    client.logs.success("Bot started successfully!");
-    
-    const dashboard = new DashboardServer(client);
-    client.dashboard = dashboard; // Garder une référence au dashboard
-    dashboard.start();
-    
     client.setMaxListeners(250);
+    client.logs.success("Bot started successfully!");
+    if (this.config.dashboard.enabled == true) {
+        const dashboard = new DashboardServer(client);
+        client.dashboard = dashboard;
+        dashboard.start();
+    }
 }).catch((err) => {
     client.logs.error(err);
 });

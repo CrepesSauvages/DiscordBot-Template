@@ -51,7 +51,7 @@
         }
     },
     "dashboard": {
-        "enabled": true,
+        "enabled": false,
         "port": 3001,
         "clientSecret": "X6-CrCUTXJwUiIHsoBqgv3am9ab_7EFc",
         "callbackURL": "http://localhost:3001/api/auth/discord/callback",
@@ -67,4 +67,5 @@
             "prompt": "consent"
         }
     }
+
 }

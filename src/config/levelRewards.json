@@ -1,0 +1,49 @@
+{
+  "rewards": [
+    {
+      "level": 5,
+      "type": "role",
+      "value": "Membre Actif",
+      "description": "Rôle pour les membres actifs"
+    },
+    {
+      "level": 10,
+      "type": "role",
+      "value": "Élite",
+      "description": "Rôle pour les membres élite"
+    },
+    {
+      "level": 15,
+      "type": "badge",
+      "value": "🚀",
+      "description": "Badge de vétéran"
+    },
+    {
+      "level": 20,
+      "type": "role",
+      "value": "Maître",
+      "description": "Rôle pour les membres maîtres"
+    },
+    {
+      "level": 30,
+      "type": "role",
+      "value": "Owner",
+      "description": "Tu es enfin le boss ultime"
+    }
+  ],
+  "permissions": {
+    "10": [
+      "manageMessages",
+      "addReactions"
+    ],
+    "20": [
+      "manageMessages",
+      "manageRoles"
+    ],
+    "30": [
+      "manageMessages",
+      "manageRoles",
+      "kickMembers"
+    ]
+  }
+}
