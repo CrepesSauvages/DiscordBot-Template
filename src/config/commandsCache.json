@@ -606,6 +606,75 @@
         {
             "options": [
                 {
+                    "type": 1,
+                    "name": "create",
+                    "description": "Crée le panneau de tickets principal",
+                    "options": [
+                        {
+                            "name": "channel",
+                            "description": "Le salon où envoyer le panneau de tickets",
+                            "required": true,
+                            "type": 7
+                        },
+                        {
+                            "type": 3,
+                            "name": "title",
+                            "description": "Titre du panneau de tickets",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "description",
+                            "description": "Description du panneau de tickets",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "manage",
+                    "description": "Gère les catégories de tickets",
+                    "options": [
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Ajouter une catégorie",
+                                    "value": "add"
+                                },
+                                {
+                                    "name": "Modifier une catégorie",
+                                    "value": "edit"
+                                },
+                                {
+                                    "name": "Supprimer une catégorie",
+                                    "value": "delete"
+                                },
+                                {
+                                    "name": "Voir les catégories",
+                                    "value": "view"
+                                },
+                                {
+                                    "name": "Définir la catégorie parente",
+                                    "value": "setparent"
+                                }
+                            ],
+                            "name": "action",
+                            "description": "Action à effectuer",
+                            "required": true
+                        }
+                    ]
+                }
+            ],
+            "name": "setup-tickets",
+            "description": "Configure le système de tickets pour votre serveur",
+            "default_member_permissions": "8",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
                     "type": 3,
                     "name": "category",
                     "description": "Catégorie spécifique à afficher",

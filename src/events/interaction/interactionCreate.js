@@ -64,7 +64,7 @@ module.exports = {
 
 async function InteractionHandler(client, interaction, type) {
 
-	const args = interaction.customId?.split("_") ?? [];
+	const args = interaction.customId?.split("-") ?? [];
 	const name = args.shift();
 
 	const component = client[type].get(name ?? interaction.commandName);
