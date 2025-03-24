@@ -1,10 +1,46 @@
 const Levels = require('../../Schemas/Level/Levels');
 const fs = require('fs');
 const path = require('path');
+const GuildRewards = require('../../Schemas/Level/GuildRewards');
+const GuildSettings = require('../../Schemas/Level/GuildSettings');
 
 class LevelSystem {
-    static async addXP(userId, guildId, xpToAdd, client) {
+    static async addXP(userId, guildId, xpToAdd, client, message) {
         try {
+            // Récupérer les paramètres de la guilde
+            const guildSettings = await GuildSettings.findOne({ guildId });
+            
+            if (guildSettings && message?.channel) {
+                // Vérifier si le canal est désactivé
+                const channel = message.channel.id;
+                if (guildSettings.disabledChannels.includes(channel)) {
+                    return { levelUp: false };
+                }
+
+                // Calculer le multiplicateur total
+                const member = await message.guild.members.fetch(userId);
+                const channelId = message.channel.id;
+                
+                let totalMultiplier = 1.0;
+
+                // Appliquer les multiplicateurs de rôle
+                const roleMultipliers = guildSettings.xpMultipliers
+                    .filter(m => m.type === 'role' && member.roles.cache.has(m.targetId));
+                for (const mult of roleMultipliers) {
+                    totalMultiplier *= mult.multiplier;
+                }
+
+                // Appliquer les multiplicateurs de canal
+                const channelMultipliers = guildSettings.xpMultipliers
+                    .filter(m => m.type === 'channel' && m.targetId === channelId);
+                for (const mult of channelMultipliers) {
+                    totalMultiplier *= mult.multiplier;
+                }
+
+                // Appliquer le multiplicateur à l'XP
+                xpToAdd = Math.floor(xpToAdd * totalMultiplier);
+            }
+
             // Cooldown de 60 secondes entre chaque gain d'XP
             const userLevel = await Levels.findOne({ userId, guildId });
             
@@ -107,10 +143,12 @@ class LevelSystem {
 
     static async applyRewards(guild, userId, newLevel, client) {
         try {
-            const rewardsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../config/levelRewards.json'), 'utf8'));
+            // Récupérer les récompenses spécifiques à la guilde
+            const guildRewards = await GuildRewards.findOne({ guildId: guild.id });
+            if (!guildRewards) return false;
             
             // Appliquer les rôles
-            for (const reward of rewardsConfig.rewards) {
+            for (const reward of guildRewards.rewards) {
                 if (newLevel >= reward.level) {
                     switch (reward.type) {
                         case 'role':
@@ -128,9 +166,9 @@ class LevelSystem {
             }
 
             // Appliquer les permissions
-            if (rewardsConfig.permissions[newLevel]) {
+            if (guildRewards.permissions.has(newLevel.toString())) {
                 const member = await guild.members.fetch(userId);
-                const permissions = rewardsConfig.permissions[newLevel];
+                const permissions = guildRewards.permissions.get(newLevel.toString());
                 // À implémenter selon votre système de permissions
             }
 
@@ -140,6 +178,7 @@ class LevelSystem {
             return false;
         }
     }
+
     static async resetUser(userId, guildId) {
         try {
             await Levels.findOneAndDelete({ userId, guildId });
@@ -186,14 +225,14 @@ class LevelSystem {
         }
     }
 
-    static async addReward(level, type, value, description) {
+    static async addReward(guildId, level, type, value, description) {
         try {
-            const configPath = path.join(__dirname, '../../../config/levelRewards.json');
-            const rewardsConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            
-            rewardsConfig.rewards.push({ level, type, value, description });
-            
-            fs.writeFileSync(configPath, JSON.stringify(rewardsConfig, null, 2));
+            const reward = { level, type, value, description };
+            await GuildRewards.findOneAndUpdate(
+                { guildId },
+                { $push: { rewards: reward } },
+                { upsert: true }
+            );
             return true;
         } catch (error) {
             console.error("Erreur lors de l'ajout de la récompense:", error);
@@ -201,23 +240,37 @@ class LevelSystem {
         }
     }
 
-    static async removeReward(level, type, value) {
+    static async removeReward(guildId, level, type, value) {
         try {
-            const rewardsConfigPath = path.join(__dirname, '../../../config/levelRewards.json');
-            const rewardsConfig = JSON.parse(fs.readFileSync(rewardsConfigPath, 'utf8'));
-    
-            rewardsConfig.rewards = rewardsConfig.rewards.filter(reward =>
-                !(reward.level === level && reward.type === type && reward.value === value)
+            await GuildRewards.findOneAndUpdate(
+                { guildId },
+                { 
+                    $pull: { 
+                        rewards: { 
+                            level, 
+                            type, 
+                            value 
+                        } 
+                    } 
+                }
             );
-    
-            fs.writeFileSync(rewardsConfigPath, JSON.stringify(rewardsConfig, null, 2));
             return true;
         } catch (error) {
-            console.error("Erreur lors de la suppression de la récompense :", error);
+            console.error("Erreur lors de la suppression de la récompense:", error);
             return false;
         }
     }
-    
+
+    static async cleanExpiredMultipliers() {
+        try {
+            await GuildSettings.updateMany(
+                { 'xpMultipliers.endDate': { $lt: new Date() } },
+                { $set: { 'xpMultipliers.$.multiplier': 1.0 } }
+            );
+        } catch (error) {
+            console.error('Erreur lors de la nettoyage des multiplicateurs expirés:', error);
+        }
+    }
 }
 
 module.exports = { LevelSystem };

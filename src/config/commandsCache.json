@@ -50,7 +50,6 @@
             ],
             "name": "backup",
             "description": "Gérer les sauvegardes du serveur",
-            "default_member_permissions": "8",
             "dm_permission": false,
             "type": 1
         },
@@ -79,6 +78,151 @@
             ],
             "name": "language",
             "description": "Définir la langue du serveur",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [],
+            "name": "migrate-rewards",
+            "description": "Migre les récompenses du système de niveau vers la base de données",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "type": 1,
+                    "name": "add",
+                    "description": "Ajoute un multiplicateur XP",
+                    "options": [
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Rôle",
+                                    "value": "role"
+                                },
+                                {
+                                    "name": "Canal",
+                                    "value": "channel"
+                                }
+                            ],
+                            "name": "type",
+                            "description": "Type de multiplicateur",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "target",
+                            "description": "ID du rôle ou du canal",
+                            "required": true
+                        },
+                        {
+                            "type": 10,
+                            "name": "multiplier",
+                            "description": "Valeur du multiplicateur (1.5 = +50% XP)",
+                            "required": true
+                        },
+                        {
+                            "type": 10,
+                            "name": "duration",
+                            "description": "Durée en heures (optionnel)",
+                            "required": false
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "remove",
+                    "description": "Supprime un multiplicateur",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "target",
+                            "description": "ID du rôle ou du canal",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "list",
+                    "description": "Liste tous les multiplicateurs actifs",
+                    "options": []
+                }
+            ],
+            "name": "multiplier",
+            "description": "Gestion des multiplicateurs XP",
+            "default_member_permissions": "8",
+            "dm_permission": false,
+            "type": 1
+        },
+        {
+            "options": [
+                {
+                    "type": 1,
+                    "name": "list",
+                    "description": "Liste toutes les récompenses du serveur",
+                    "options": []
+                },
+                {
+                    "type": 1,
+                    "name": "add",
+                    "description": "Ajoute une récompense",
+                    "options": [
+                        {
+                            "type": 10,
+                            "name": "level",
+                            "description": "Niveau requis",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "choices": [
+                                {
+                                    "name": "Rôle",
+                                    "value": "role"
+                                },
+                                {
+                                    "name": "Badge",
+                                    "value": "badge"
+                                }
+                            ],
+                            "name": "type",
+                            "description": "Type de récompense",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "value",
+                            "description": "Nom du rôle ou émoji du badge",
+                            "required": true
+                        },
+                        {
+                            "type": 3,
+                            "name": "description",
+                            "description": "Description de la récompense",
+                            "required": false
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
+                    "name": "remove",
+                    "description": "Supprime une récompense",
+                    "options": [
+                        {
+                            "type": 10,
+                            "name": "level",
+                            "description": "Niveau de la récompense",
+                            "required": true
+                        }
+                    ]
+                }
+            ],
+            "name": "rewards",
+            "description": "Gestion des récompenses du serveur",
+            "default_member_permissions": "8",
             "dm_permission": false,
             "type": 1
         },
@@ -286,7 +430,7 @@
                     ]
                 }
             ],
-            "name": "rewards",
+            "name": "reward",
             "description": "Voir les récompenses disponibles",
             "dm_permission": false,
             "type": 1

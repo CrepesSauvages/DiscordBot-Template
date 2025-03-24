@@ -2,10 +2,11 @@ const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('disc
 const BackupManager = require('../../utils/System/BackupManager');
 
 module.exports = {
+    userPerms: ['Administrator'],
+    cooldown: 60,
     data: new SlashCommandBuilder()
         .setName('backup')
         .setDescription('Gérer les sauvegardes du serveur')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('create')

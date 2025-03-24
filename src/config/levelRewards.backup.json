@@ -33,12 +33,10 @@
   ],
   "permissions": {
     "10": [
-      "manageMessages",
       "addReactions"
     ],
     "20": [
-      "manageMessages",
-      "manageRoles"
+      "manageMessages"
     ],
     "30": [
       "manageMessages",

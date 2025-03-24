@@ -1,12 +1,13 @@
 const { ActivityType } = require("discord.js"); // Ajoute cette importation
 const ModerationService = require("../../utils/System/Modération/ModerationService");
-
+const { LevelSystem } = require("../../utils/System/Level/levelSystem");
 module.exports = {
     name: 'ready',
     execute: async function (client) {
         client.logs.custom(`🟢 ${client.user.tag} est prêt !`, 0x7946ff);
         client.moderationService = new ModerationService(client);
         //client.moderationService.start();
+        setInterval(LevelSystem.cleanExpiredMultipliers, 120000)
 
         if (client.config.activity.dynamic) {
             const activities = client.config.activity.choices.sort((a, b) => a.order - b.order);

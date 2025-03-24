@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const GuildSettings = require('../../utils/Schemas/GuildSettings');
 
 module.exports = {
+    userPerms: ['Administrator'],
     data: new SlashCommandBuilder()
         .setName('setlogs')
         .setDescription('Définit le canal pour les logs')
@@ -11,12 +12,6 @@ module.exports = {
                 .setRequired(true)),
 
     async execute(interaction) {
-        if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-            return interaction.reply({ 
-                content: '❌ Vous devez être administrateur pour utiliser cette commande.',
-                ephemeral: true 
-            });
-        }
 
         const channel = interaction.options.getChannel('channel');
         
