@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const TicketConfig = require('../../utils/Schemas/Ticket/TicketConfig');
+const TicketConfig = require('../../../utils/Schemas/Ticket/TicketConfig');
 
 module.exports = {
   customID: 'select_discord_category',
