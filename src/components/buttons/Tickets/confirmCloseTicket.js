@@ -1,14 +1,15 @@
 const { EmbedBuilder } = require('discord.js');
+const { createTranscript } = require('discord-html-transcripts');
 const Ticket = require('../../../utils/Schemas/Ticket/Ticket');
 const TicketConfig = require('../../../utils/Schemas/Ticket/TicketConfig');
 
 module.exports = {
   customID: 'confirm_close_ticket',
   
-  async execute(interaction, client, args) {
+  execute: async function(interaction) {
     try {
-      // Vérifier si c'est bien un ticket
       const ticket = await Ticket.findOne({ channelId: interaction.channel.id });
+      const ticketConfig = await TicketConfig.findOne({ guildId: interaction.guild.id });
       
       if (!ticket) {
         return interaction.reply({
@@ -16,61 +17,85 @@ module.exports = {
           ephemeral: true
         });
       }
-      
-      // Mettre à jour le statut du ticket
+
+      await interaction.deferReply({ ephemeral: true });
+
+      // Créer la transcription HTML
+      const transcript = await createTranscript(interaction.channel, {
+        limit: -1, // Pas de limite de messages
+        fileName: `ticket-${ticket.ticketNumber}.html`,
+        poweredBy: false,
+        saveImages: true,
+        footerText: `Ticket #${ticket.ticketNumber} - ${ticket.category}`,
+      });
+
+      // Enregistrer les informations dans la base de données
       ticket.status = 'closed';
       ticket.closedAt = new Date();
       await ticket.save();
-      
-      const ticketConfig = await TicketConfig.findOne({ guildId: interaction.guild.id });
-      
-      await interaction.reply({ content: "Fermeture du ticket en cours..." });
-      
-      // Si un salon de logs est configuré, y envoyer un message
+
+      // Envoyer la transcription dans le canal de logs si configuré
       if (ticketConfig && ticketConfig.logChannel) {
         const logChannel = interaction.guild.channels.cache.get(ticketConfig.logChannel);
-        
         if (logChannel) {
-          const logEmbed = new EmbedBuilder()
-            .setTitle(`Ticket #${ticket.ticketNumber} fermé`)
-            .setDescription(`Le ticket a été fermé par ${interaction.user.tag}`)
-            .addFields(
-              { name: 'Catégorie', value: ticket.category },
-              { name: 'Créé par', value: `<@${ticket.ownerId}>` },
-              { name: 'Fermé le', value: new Date().toLocaleString() }
-            )
+          const embed = new EmbedBuilder()
+            .setTitle(`Transcription du ticket #${ticket.ticketNumber}`)
+            .setDescription(`**Catégorie:** ${ticket.category}\n**Créé par:** <@${ticket.ownerId}>\n**Fermé par:** <@${interaction.user.id}>\n**Créé le:** ${ticket.createdAt.toLocaleString()}\n**Fermé le:** ${new Date().toLocaleString()}`)
             .setColor('#ff0000')
             .setTimestamp();
-          
-          await logChannel.send({ embeds: [logEmbed] });
-        }
-      }
-      
-      // Délai avant suppression ou archivage
-      setTimeout(async () => {
-        if (ticketConfig && ticketConfig.archiveCategory) {
-          // Déplacer vers la catégorie d'archive si configurée
-          const archiveCategory = interaction.guild.channels.cache.get(ticketConfig.archiveCategory);
-          
-          if (archiveCategory) {
-            await interaction.channel.setParent(archiveCategory.id, { lockPermissions: false });
-            await interaction.channel.send({
-              content: `Ce ticket a été archivé par ${interaction.user.tag}.`
-            });
-          } else {
-            await interaction.channel.delete();
-          }
+
+          await logChannel.send({ embeds: [embed] });
+          await logChannel.send({ files: [transcript] });
         } else {
-          // Supprimer le salon si pas de catégorie d'archive
-          await interaction.channel.delete();
+          await interaction.editReply({
+            content: "⚠️ Le salon de logs n'a pas été trouvé. La transcription ne sera pas sauvegardée.",
+            ephemeral: true
+          });
         }
-      }, 5000); // 5 secondes avant suppression/archivage
-    } catch (error) {
-      console.error(error);
-      await interaction.reply({
-        content: 'Une erreur est survenue lors de la fermeture du ticket.',
+      } else {
+        await interaction.editReply({
+          content: "⚠️ Aucun salon de logs n'est configuré. La transcription ne sera pas sauvegardée.",
+          ephemeral: true
+        });
+      }
+
+      // Message de confirmation
+      await interaction.editReply({
+        content: "Le ticket va être fermé et une transcription a été créée. Le salon sera supprimé dans 5 secondes.",
         ephemeral: true
       });
+
+      // Envoyer un message visible par tout le monde dans le ticket
+      await interaction.channel.send({
+        content: `🔒 Ce ticket a été fermé par ${interaction.user}. Le salon sera supprimé dans 5 secondes.`
+      });
+
+      // Supprimer le salon après 5 secondes
+      setTimeout(async () => {
+        try {
+          await interaction.channel.delete();
+        } catch (error) {
+          console.error('Erreur lors de la suppression du salon:', error);
+          await interaction.editReply({
+            content: "Une erreur est survenue lors de la suppression du salon.",
+            ephemeral: true
+          });
+        }
+      }, 5000);
+
+    } catch (error) {
+      console.error(error);
+      if (interaction.deferred) {
+        await interaction.editReply({
+          content: 'Une erreur est survenue lors de la fermeture du ticket.',
+          ephemeral: true
+        });
+      } else {
+        await interaction.reply({
+          content: 'Une erreur est survenue lors de la fermeture du ticket.',
+          ephemeral: true
+        });
+      }
     }
   }
 }; 

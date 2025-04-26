@@ -122,7 +122,13 @@ module.exports = {
         .setStyle(ButtonStyle.Success)
         .setEmoji('🙋');
       
-      const row = new ActionRowBuilder().addComponents(closeButton, claimButton);
+      const manageButton = new ButtonBuilder()
+        .setCustomId('ticket_management')
+        .setLabel('Gérer le ticket')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('⚙️');
+      
+      const row = new ActionRowBuilder().addComponents(closeButton, claimButton, manageButton);
       
       await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: [row] });
       

@@ -3,7 +3,7 @@ const TicketConfig = require('../../utils/Schemas/Ticket/TicketConfig');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('setup-tickets')
+    .setName('tickets')
     .setDescription('Configure le système de tickets pour votre serveur')
     .addSubcommand(subcommand =>
       subcommand
@@ -23,6 +23,15 @@ module.exports = {
             .setRequired(true)))
     .addSubcommand(subcommand =>
       subcommand
+        .setName('logs')
+        .setDescription('Configure le salon des logs de tickets')
+        .addChannelOption(option =>
+          option.setName('channel')
+            .setDescription('Le salon où envoyer les transcriptions')
+            .setRequired(true)
+            .addChannelTypes(ChannelType.GuildText)))
+    .addSubcommand(subcommand =>
+      subcommand
         .setName('manage')
         .setDescription('Gère les catégories de tickets')
         .addStringOption(option =>
@@ -40,6 +49,33 @@ module.exports = {
 
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
+
+    if (subcommand === 'logs') {
+      const channel = interaction.options.getChannel('channel');
+      
+      // Vérifier si le bot a les permissions nécessaires
+      const permissions = channel.permissionsFor(interaction.client.user);
+      if (!permissions.has(PermissionFlagsBits.SendMessages) || !permissions.has(PermissionFlagsBits.ViewChannel)) {
+        return interaction.reply({
+          content: "Je n'ai pas les permissions nécessaires dans ce salon. J'ai besoin des permissions de voir le salon et d'envoyer des messages.",
+          ephemeral: true
+        });
+      }
+
+      // Mettre à jour la configuration
+      let config = await TicketConfig.findOne({ guildId: interaction.guild.id });
+      if (!config) {
+        config = new TicketConfig({ guildId: interaction.guild.id });
+      }
+
+      config.logChannel = channel.id;
+      await config.save();
+
+      return interaction.reply({
+        content: `Le salon ${channel} a été configuré comme salon de logs pour les tickets.`,
+        ephemeral: true
+      });
+    }
 
     if (subcommand === 'create') {
       const channel = interaction.options.getChannel('channel');
