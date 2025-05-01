@@ -801,13 +801,6 @@
             "description": "Gestion des commandes temporaires",
             "dm_permission": false,
             "type": 1
-        },
-        {
-            "options": [],
-            "name": "testbot",
-            "description": "Teste toutes les fonctionnalités du bot",
-            "dm_permission": false,
-            "type": 1
         }
     ]
 }
