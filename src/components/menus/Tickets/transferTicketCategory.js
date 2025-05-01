@@ -1,6 +1,6 @@
 const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const Ticket = require('../../../../utils/Schemas/Ticket/Ticket');
-const TicketConfig = require('../../../../utils/Schemas/Ticket/TicketConfig');
+const Ticket = require('../../../utils/Schemas/Ticket/Ticket');
+const TicketConfig = require('../../../utils/Schemas/Ticket/TicketConfig');
 
 module.exports = {
   customID: 'transfer_ticket_category',
