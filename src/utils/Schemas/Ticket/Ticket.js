@@ -9,7 +9,9 @@ const ticketSchema = new mongoose.Schema({
   status: { type: String, enum: ['open', 'closed', 'archived'], default: 'open' },
   createdAt: { type: Date, default: Date.now },
   closedAt: { type: Date, default: null },
-  participants: [{ type: String }]
+  participants: [{ type: String }],
+  transcript: { type: String, default: null },
+  claimedBy: { type: String, default: null }
 });
 
 module.exports = mongoose.model('Ticket', ticketSchema);

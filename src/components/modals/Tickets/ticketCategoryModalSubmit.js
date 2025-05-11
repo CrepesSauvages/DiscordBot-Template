@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const TicketConfig = require('../../utils/Schemas/Ticket/TicketConfig');
+const TicketConfig = require('../../../utils/Schemas/Ticket/TicketConfig');
 
 module.exports = {
   customID: 'ticket_category_modal',

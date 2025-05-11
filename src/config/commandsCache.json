@@ -632,6 +632,22 @@
                 },
                 {
                     "type": 1,
+                    "name": "logs",
+                    "description": "Configure le salon des logs de tickets",
+                    "options": [
+                        {
+                            "channel_types": [
+                                0
+                            ],
+                            "name": "channel",
+                            "description": "Le salon où envoyer les transcriptions",
+                            "required": true,
+                            "type": 7
+                        }
+                    ]
+                },
+                {
+                    "type": 1,
                     "name": "manage",
                     "description": "Gère les catégories de tickets",
                     "options": [
@@ -666,7 +682,7 @@
                     ]
                 }
             ],
-            "name": "setup-tickets",
+            "name": "tickets",
             "description": "Configure le système de tickets pour votre serveur",
             "default_member_permissions": "8",
             "dm_permission": false,
@@ -783,13 +799,6 @@
             ],
             "name": "temp",
             "description": "Gestion des commandes temporaires",
-            "dm_permission": false,
-            "type": 1
-        },
-        {
-            "options": [],
-            "name": "testbot",
-            "description": "Teste toutes les fonctionnalités du bot",
             "dm_permission": false,
             "type": 1
         }

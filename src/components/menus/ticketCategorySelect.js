@@ -122,9 +122,22 @@ module.exports = {
         .setStyle(ButtonStyle.Success)
         .setEmoji('🙋');
       
-      const row = new ActionRowBuilder().addComponents(closeButton, claimButton);
+      const manageButton = new ButtonBuilder()
+        .setCustomId('ticket_management')
+        .setLabel('Gérer le ticket')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('⚙️');
+
+      const transferButton = new ButtonBuilder()
+        .setCustomId('transfer_ticket')
+        .setLabel('Transférer')
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji('↗️');
       
-      await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: [row] });
+      const row1 = new ActionRowBuilder().addComponents(closeButton, claimButton, manageButton);
+      const row2 = new ActionRowBuilder().addComponents(transferButton);
+      
+      await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: [row1, row2] });
       
       await interaction.reply({
         content: `Votre ticket a été créé : <#${channel.id}>`,

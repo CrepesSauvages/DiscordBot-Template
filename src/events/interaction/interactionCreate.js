@@ -63,17 +63,62 @@ module.exports = {
 }
 
 async function InteractionHandler(client, interaction, type) {
-
-	const args = interaction.customId?.split("-") ?? [];
-	const name = args.shift();
-
-	const component = client[type].get(name ?? interaction.commandName);
+	// Récupérer le customId complet (commandName pour les slash commands)
+	const fullCustomId = interaction.customId || interaction.commandName;
+	
+	// Traiter les customIDs dynamiques avec paramètres
+	// Format supporté:
+	// 1. base-arg1-arg2 (format habituel avec tirets)
+	// 2. base#param1#param2 (nouveau format avec # comme séparateur de paramètres)
+	
+	let baseId, args, params;
+	
+	if (fullCustomId.includes('#')) {
+		// Nouveau format avec # comme séparateur
+		[baseId, ...params] = fullCustomId.split('#');
+		args = []; // Pas d'args dans ce format, seulement des params
+	} else {
+		// Format traditionnel avec tirets
+		args = fullCustomId.split('-');
+		baseId = args.shift();
+		params = []; // Pas de params dans ce format
+	}
+	
+	// Stocker les paramètres dans l'interaction pour y accéder facilement
+	interaction.params = params;
+	
+	// Chercher le composant par son ID de base
+	let component = client[type].get(baseId);
+	
+	// Gestion des noms de composants dynamiques (comme 'use_template_category')
+	if (!component && type === 'menus') {
+		// Chercher un handler qui correspond au pattern du customId
+		for (const [handlerId, handler] of client[type].entries()) {
+			// Cas 1: Le handler a une méthode customID qui est une fonction
+			if (typeof handler.customID === 'function' && handler.customID(fullCustomId)) {
+				component = handler;
+				break;
+			}
+			
+			// Cas 2: Le customId commence par le nom du handler suivi d'un underscore
+			// Exemple: "use_template_Général" correspondrait au handler "use_template"
+			if (fullCustomId.startsWith(`${handlerId}_`)) {
+				// Extraire la partie après le underscore comme paramètre
+				const dynamicPart = fullCustomId.substring(handlerId.length + 1);
+				if (!interaction.params) interaction.params = [];
+				interaction.params.push(dynamicPart);
+				component = handler;
+				break;
+			}
+		}
+	}
+	
 	if (!component) {
 		await interaction.reply({
 			content: `There was an error while executing this command!\n\`\`\`Command not found\`\`\``,
 			ephemeral: true
 		}).catch(() => { });
-		client.logs.error(`${type} not found: ${interaction.customId}`);
+		client.logs.error(`${type} not found: ${fullCustomId}`);
 		return;
 	}
 
@@ -81,7 +126,7 @@ async function InteractionHandler(client, interaction, type) {
 		CheckGuildAccess(component.guilds, interaction.guildId);
 		CheckUserAccess(component.roles, component.users, interaction.member, interaction.user);
 		if (!interaction.isAutocomplete()) {
-			CheckCooldown(client, interaction.user.id, component.customID ?? interaction.commandName, component.cooldown);
+			CheckCooldown(client, interaction.user.id, component.customID ?? fullCustomId, component.cooldown);
 		}
 
 		const botMember = interaction.guild?.members.cache.get(client.user.id) ?? await interaction.guild?.members.fetch(client.user.id).catch(() => null);
