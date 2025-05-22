@@ -59,7 +59,7 @@ class DashboardServer {
         this.app.use(session({
             secret: this.client.config.dashboard.sessionSecret,
             store: MongoStore.create({
-                mongoUrl: this.client.config.database.mongodb.uri
+                mongoUrl: this.client.config.database.mongodb.urilocal,
             }),
             resave: false,
             saveUninitialized: false,

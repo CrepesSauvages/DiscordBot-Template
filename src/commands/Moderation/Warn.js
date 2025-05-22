@@ -55,7 +55,20 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('recent')
-                .setDescription('Voir les avertissements récents')),
+                .setDescription('Voir les avertissements récents'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('info')
+                .setDescription('Voir les détails d\'un avertissement spécifique')
+                .addUserOption(option =>
+                    option.setName('user')
+                        .setDescription('L\'utilisateur à vérifier')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option.setName('warnid')
+                        .setDescription('ID de l\'avertissement')
+                        .setRequired(true)
+                        .setAutocomplete(false))),
 
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
@@ -76,8 +89,11 @@ module.exports = {
             case 'recent':
                 await handleRecentWarns(interaction);
                 break;
+            case 'info':
+                await handleWarnInfo(interaction);
+                break;
         }
-    }
+    },
 };
 
 // Fonction pour convertir la durée en millisecondes
@@ -381,6 +397,60 @@ async function handleRecentWarns(interaction) {
         console.error('Erreur lors de la récupération des warns récents:', error);
         await interaction.reply({
             content: 'Une erreur est survenue lors de la récupération des avertissements récents.',
+            ephemeral: true
+        });
+    }
+}
+
+async function handleWarnInfo(interaction) {
+    const user = interaction.options.getUser('user');
+    const warnId = interaction.options.getString('warnid');
+
+    try {
+        const modCase = await ModCase.findOne({
+            userId: user.id,
+            guildId: interaction.guild.id,
+            'sanctions.sanctionId': warnId
+        });
+
+        if (!modCase) {
+            return interaction.reply({
+                content: 'Avertissement non trouvé.',
+                ephemeral: true
+            });
+        }
+
+        const warn = modCase.sanctions.find(s => s.sanctionId === warnId);
+        if (!warn) {
+            return interaction.reply({
+                content: 'Avertissement non trouvé.',
+                ephemeral: true
+            });
+        }
+
+        const embed = new EmbedBuilder()
+            .setColor(warn.expired ? '#808080' : '#FF9900')
+            .setTitle(`Détails de l'avertissement ${warn.sanctionId}`)
+            .setDescription(`Informations sur l'avertissement de ${user.tag}`)
+            .addFields(
+                { name: 'Raison', value: warn.reason },
+                { name: 'Modérateur', value: `<@${warn.moderatorId}>` },
+                { name: 'Date', value: `<t:${Math.floor(warn.timestamp.getTime() / 1000)}:F>` },
+                { name: 'Statut', value: warn.expired ? 'Expiré' : 'Actif' },
+                { name: 'Expiration', value: warn.expiresAt ? `<t:${Math.floor(warn.expiresAt.getTime() / 1000)}:R>` : 'Jamais' }
+            )
+            .setTimestamp();
+
+        if (warn.proof && warn.proof !== 'Aucune preuve fournie') {
+            embed.addFields({ name: 'Preuve', value: warn.proof });
+        }
+
+        await interaction.reply({ embeds: [embed] });
+
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails du warn:', error);
+        await interaction.reply({
+            content: 'Une erreur est survenue lors de la récupération des détails de l\'avertissement.',
             ephemeral: true
         });
     }
